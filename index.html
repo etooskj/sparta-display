@@ -1,0 +1,1831 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SPARTA SAM 송도센터 | 실시간 시간표</title>
+  <style>
+    :root{
+      --bg:#0b0d12;
+      --fg:#ffffff;
+      --muted:rgba(255,255,255,.72);
+      --muted2:rgba(255,255,255,.50);
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.12);
+      --accent:#d11f2e; /* 스파르타 레드 느낌 */
+      --accent2:#2b6cff;
+      --accent3:#1fbf75;
+      --accent4:#a855f7;
+      --shadow: 0 18px 60px rgba(0,0,0,.40);
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Pretendard", "Noto Sans KR", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 15% 15%, rgba(209,31,46,.16), transparent 60%),
+                  radial-gradient(900px 600px at 80% 20%, rgba(43,108,255,.14), transparent 55%),
+                  radial-gradient(1000px 700px at 60% 85%, rgba(31,191,117,.10), transparent 60%),
+                  var(--bg);
+      color:var(--fg);
+      overflow:hidden;
+    }
+
+    .wrap{
+      height:100%;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      gap:18px;
+      padding:28px 30px;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width: 360px;
+    }
+    .logo{
+      width:44px; height:44px;
+      border-radius:14px;
+      background: linear-gradient(135deg, rgba(209,31,46,1), rgba(209,31,46,.65));
+      background-image: url("helmet.png");
+      background-repeat:no-repeat;
+      background-position:center;
+      background-size: 70%;
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo::after{
+      content:"";
+      position:absolute;
+      inset:-18px -18px auto auto;
+      width:70px; height:70px;
+      background: rgba(255,255,255,.18);
+      transform: rotate(25deg);
+      border-radius: 24px;
+    }
+    .brand h1{
+      font-size:20px;
+      letter-spacing:.4px;
+      margin:0;
+      line-height:1.2;
+    }
+    .brand .sub{
+      font-size:18px;
+      color:var(--muted);
+      margin-top:3px;
+    }
+
+    .topRight{
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-end;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+    }
+    .pill .k{ color: var(--muted2); font-size:17px; }
+    .pill .v{ font-weight:700; font-size:20px; letter-spacing:.3px; }
+
+    button{
+      appearance:none;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--fg);
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+    }
+    button:hover{ background: rgba(255,255,255,.10); }
+    button:active{ transform: translateY(1px); }
+
+    main{
+      display:grid;
+      grid-template-columns: 1.6fr .9fr;
+      gap:18px;
+      min-height:0;
+    }
+
+    .hero{
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius:26px;
+      padding:22px 22px 18px 22px;
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:auto -160px -160px auto;
+      width:420px; height:420px;
+      background: radial-gradient(circle at 30% 30%, rgba(209,31,46,.35), transparent 55%);
+      filter: blur(1px);
+      transform: rotate(-15deg);
+      pointer-events:none;
+    }
+
+    .heroTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .statusBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+    }
+
+    .dot{
+      width:10px; height:10px;
+      border-radius:999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(209,31,46,.18);
+    }
+
+    .heroTitle{
+      margin-top:12px;
+      font-size:88px;
+      line-height:1.05;
+      letter-spacing:-.8px;
+      margin-bottom:6px;
+      font-weight:900;
+      word-break:keep-all;
+    }
+
+    .heroSubtitle{
+      color:var(--muted);
+      font-size:26px;
+      line-height:1.4;
+      margin:0 0 18px 0;
+      word-break:keep-all;
+    }
+
+    .metaRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .card{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      border-radius:20px;
+      padding:14px 14px;
+      min-height:84px;
+    }
+    .card .k{
+      color:var(--muted2);
+      font-size:17px;
+      margin-bottom:6px;
+    }
+    .card .v{
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .card .s{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:18px;
+    }
+
+    .progressWrap{
+      margin-top:14px;
+      border-radius:999px;
+      height:12px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .progressBar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(209,31,46,1), rgba(255,255,255,.20));
+      border-radius:999px;
+      transition: width .4s ease;
+    }
+
+    .side{
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      gap:18px;
+      min-height:0;
+    }
+
+    .tableCard{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      border-radius:26px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .tableHead{
+      padding:16px 16px 12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .tableHead h2{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+    }
+    .small{
+      font-size:17px;
+      color:var(--muted);
+    }
+
+    .rows{
+      padding:10px 10px 10px 10px;
+      overflow:auto;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 96px 1fr 92px;
+      gap:10px;
+      padding:10px 10px;
+      border-radius:18px;
+      border:1px solid transparent;
+      align-items:center;
+    }
+    .row + .row{ margin-top:8px; }
+    .row .t{
+      font-variant-numeric: tabular-nums;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .row .l{
+      color:var(--muted);
+      font-weight:800;
+      word-break:keep-all;
+    }
+    .row .tag{
+      justify-self:end;
+      font-size:17px;
+      font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.86);
+      white-space:nowrap;
+    }
+    .row.active{
+      border-color: rgba(255,255,255,.20);
+      background: rgba(255,255,255,.07);
+    }
+
+    footer{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      color:var(--muted2);
+      font-size:17px;
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:14px;
+    }
+
+    .note{
+      color:var(--muted);
+      line-height:1.35;
+      word-break:keep-all;
+    }
+
+    .kbd{
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      border-radius:10px;
+      padding:4px 8px;
+      font-weight:900;
+      color: rgba(255,255,255,.85);
+    }
+
+    /* 상태별 컬러 */
+    body.mode-class .dot{ background: var(--accent); box-shadow:0 0 0 6px rgba(209,31,46,.18); }
+    body.mode-break .dot{ background: var(--accent2); box-shadow:0 0 0 6px rgba(43,108,255,.18); }
+    body.mode-meal  .dot{ background: var(--accent3); box-shadow:0 0 0 6px rgba(31,191,117,.18); }
+    body.mode-open  .dot{ background: rgba(255,255,255,.80); box-shadow:0 0 0 6px rgba(255,255,255,.12); }
+    body.mode-night .dot{ background: var(--accent4); box-shadow:0 0 0 6px rgba(168,85,247,.16); }
+    body.mode-off   .dot{ background: rgba(255,255,255,.35); box-shadow:0 0 0 6px rgba(255,255,255,.08); }
+
+    body.mode-break .progressBar{ background: linear-gradient(90deg, rgba(43,108,255,1), rgba(255,255,255,.18));}
+    body.mode-meal  .progressBar{ background: linear-gradient(90deg, rgba(31,191,117,1), rgba(255,255,255,.18));}
+    body.mode-open  .progressBar{ background: linear-gradient(90deg, rgba(255,255,255,.85), rgba(255,255,255,.18));}
+    body.mode-night .progressBar{ background: linear-gradient(90deg, rgba(168,85,247,1), rgba(255,255,255,.18));}
+
+    /* 스크롤바 (TV에서 깔끔하게) */
+    .rows::-webkit-scrollbar{ width:10px; }
+    .rows::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.10); border-radius:999px; }
+    .rows::-webkit-scrollbar-track{ background: rgba(255,255,255,.03); border-radius:999px; }
+  
+    /* 모드별 전체 배경(멀리서도 한눈에) */
+    body.mode-class{
+      background: radial-gradient(1400px 800px at 20% 15%, rgba(255,255,255,.08), transparent 60%),
+                  linear-gradient(135deg, rgba(209,31,46,.30), rgba(11,13,18,1) 55%);
+    }
+    body.mode-break{
+      background: radial-gradient(1200px 700px at 15% 15%, rgba(255,255,255,.07), transparent 60%),
+                  linear-gradient(135deg, rgba(43,108,255,.28), rgba(11,13,18,1) 58%);
+    }
+    body.mode-meal{
+      background: radial-gradient(1200px 700px at 15% 15%, rgba(255,255,255,.07), transparent 60%),
+                  linear-gradient(135deg, rgba(31,191,117,.24), rgba(11,13,18,1) 60%);
+    }
+    body.mode-open{
+      background: radial-gradient(1200px 700px at 15% 15%, rgba(255,255,255,.08), transparent 60%),
+                  linear-gradient(135deg, rgba(255,255,255,.10), rgba(11,13,18,1) 62%);
+    }
+    body.mode-night{
+      background: radial-gradient(1200px 700px at 15% 15%, rgba(255,255,255,.07), transparent 60%),
+                  linear-gradient(135deg, rgba(168,85,247,.24), rgba(11,13,18,1) 60%);
+    }
+    body.mode-off{
+      background: radial-gradient(1200px 700px at 15% 15%, rgba(255,255,255,.05), transparent 60%),
+                  linear-gradient(135deg, rgba(255,255,255,.06), rgba(11,13,18,1) 65%);
+    }
+
+    /* 화면 전환 애니메이션 */
+    .hero, .tableCard, .pill, .statusBadge{
+      transition: transform .35s ease, background .35s ease, border-color .35s ease, box-shadow .35s ease, filter .35s ease;
+    }
+    body.flash .hero{
+      transform: translateY(-2px) scale(1.01);
+      filter: brightness(1.08);
+    }
+
+    /* 상단 배너(주말/공휴일 모드) */
+    .banner{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      font-weight:900;
+      letter-spacing:.2px;
+      display:none;
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+    }
+    .banner small{
+      display:block;
+      margin-top:4px;
+      font-weight:800;
+      color: rgba(255,255,255,.72);
+      letter-spacing:0;
+    }
+
+  
+    /* 투구 워터마크 */
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:auto -40px -80px auto;
+      width:min(520px, 42vw);
+      height:min(520px, 42vw);
+      background: url("helmet.png") no-repeat center / contain;
+      opacity:.14;
+      filter: drop-shadow(0 18px 40px rgba(0,0,0,.45));
+      transform: rotate(-8deg);
+      pointer-events:none;
+    }
+    .tableCard.logoBg{
+      position:relative;
+    }
+    .tableCard.logoBg::after{
+      content:"";
+      position:absolute;
+      inset:auto -60px -90px auto;
+      width:360px;
+      height:360px;
+      background: url("helmet.png") no-repeat center / contain;
+      opacity:.08;
+      pointer-events:none;
+      filter: drop-shadow(0 16px 34px rgba(0,0,0,.35));
+      transform: rotate(-10deg);
+    }
+
+  
+    /* 화면 전체 하단 운영안내 바 */
+    .bottomNotice{
+      margin-top:20px;
+      border-radius:26px;
+      padding:0;
+      background: linear-gradient(135deg,
+        rgba(209,31,46,.18),
+        rgba(0,0,0,.75)
+      );
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    }
+    .noticeInner{
+      padding:36px 40px;
+    }
+    .noticeTitle{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:.6px;
+      margin-bottom:18px;
+    }
+    .noticeBody{
+      font-size:22px;
+      line-height:1.8;
+      color:rgba(255,255,255,.92);
+    }
+
+
+    .btn.danger{
+      background: rgba(209,31,46,.18);
+      border: 1px solid rgba(209,31,46,.45);
+    }
+    .btn.danger.on{
+      background: rgba(209,31,46,.35);
+      border-color: rgba(209,31,46,.7);
+    }
+    #toast{
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.75);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+    #toast.show{ opacity: 1; }
+    .noticeBody, .noticeTitle, footer, .pill, button, select{
+      word-break: keep-all;
+      overflow-wrap: normal;
+    }
+
+
+/* ===== 테마 시스템 (다크/라이트/고대비) ===== */
+:root{
+  --bg:#0f1115;
+  --panel:#171a21;
+  --panel2:#1c2029;
+  --text:#ffffff;
+  --muted:#b8bcc8;
+  --border: rgba(255,255,255,.10);
+  --accent:#e53935;
+  --btnBg: rgba(255,255,255,.06);
+  --btnBorder: rgba(255,255,255,.14);
+}
+:root.theme-light{
+  --bg:#f5f6f8;
+  --panel:#ffffff;
+  --panel2:#ffffff;
+  --text:#111111;
+  --muted:#444444;
+  --border: rgba(0,0,0,.12);
+  --accent:#c62828;
+  --btnBg: rgba(0,0,0,.04);
+  --btnBorder: rgba(0,0,0,.14);
+}
+:root.theme-contrast{
+  --bg:#ffffff;
+  --panel:#ffffff;
+  --panel2:#ffffff;
+  --text:#000000;
+  --muted:#000000;
+  --border: #000000;
+  --accent:#000000;
+  --btnBg:#ffffff;
+  --btnBorder:#000000;
+}
+
+/* 광범위하게 적용 (기존 스타일 위에 덮어쓰기) */
+body{ background:var(--bg) !important; color:var(--text) !important; }
+header{ background:var(--panel) !important; color:var(--text) !important; border-color:var(--border) !important; }
+.pill{ background:var(--panel2) !important; color:var(--text) !important; border-color:var(--border) !important; }
+.panel{ background:var(--panel) !important; color:var(--text) !important; border-color:var(--border) !important; }
+.btn{ background:var(--btnBg) !important; border-color:var(--btnBorder) !important; color:var(--text) !important; }
+select, input[type="range"]{ accent-color: var(--accent); }
+
+
+    .miniOpt{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--btnBg);
+      user-select:none;
+      font-size:14px;
+      line-height:1;
+      height:40px;
+    }
+    .miniOpt input{ width:16px; height:16px; }
+
+
+/* ===== v4.7.1 테마 가독성 패치 (라이트/고대비 버튼 글씨 문제 해결) =====
+   v4 원본은 --fg / --muted / --muted2 등 변수로 글씨색을 정합니다.
+   라이트/고대비에서 이 변수를 같이 바꿔줘야 버튼/필드 글씨가 선명해집니다.
+*/
+:root{
+  --fg: var(--text);
+}
+:root.theme-light{
+  --fg: #111111;
+  --muted: rgba(0,0,0,.72);
+  --muted2: rgba(0,0,0,.62);
+  --border: rgba(0,0,0,.14);
+}
+:root.theme-contrast{
+  --fg: #000000;
+  --muted: #000000;
+  --muted2: #000000;
+  --border: #000000;
+}
+/* 버튼/체크박스/셀렉트 텍스트를 강제 선명하게 */
+button, .btn, select, option, label{ color: var(--fg) !important; }
+
+
+/* ===== v4.7.2 일반모드에서는 설정 UI 숨김 (관리자모드에서만 표시) ===== */
+html:not(.admin-on) .adminOnly{ display:none !important; }
+/* 관리자 버튼은 일반모드에서도 보이게(작게) */
+html:not(.admin-on) #adminLockBtn{ opacity:.78; }
+
+
+/* ===== v4.7.4 전광판 운용 옵션: 자동 전체화면 유도 + 새로고침 방지 ===== */
+#fsPrompt{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.35);
+  z-index: 9998;
+}
+#fsPrompt .box{
+  background: rgba(255,255,255,.92);
+  color: #111;
+  border-radius: 18px;
+  padding: 18px 20px;
+  min-width: 280px;
+  max-width: min(520px, 92vw);
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0,0,0,.25);
+  border: 1px solid rgba(0,0,0,.08);
+}
+html.theme-light #fsPrompt .box,
+html.theme-contrast #fsPrompt .box{ background: rgba(255,255,255,.94); color:#111; }
+#fsPrompt .title{ font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+#fsPrompt .desc{ font-size: 14px; opacity:.9; margin-bottom: 14px; line-height: 1.35; }
+#fsPrompt .actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+#fsPrompt .actions button{
+  height: 42px; padding: 0 14px; border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.15);
+  background: #111; color:#fff; font-weight: 700;
+}
+#fsPrompt .actions button.secondary{
+  background: rgba(0,0,0,.06); color:#111;
+}
+
+</style>
+</head>
+
+<body class="mode-off">
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>SPARTA SAM SONGDO CENTER</h1>
+          <div class="sub">재학생 / N수생 대상 · 실시간 시간표</div>
+
+        <div class="banner" id="banner">
+          오늘은 <span id="dayModeText">자율 등원</span> 모드입니다
+          <small id="dayModeSub">공휴일/일요일: 식사 배달 서비스 미제공</small>
+        </div>
+        </div>
+      </div>
+
+      <div class="topRight">
+        
+        <button id="adminLockBtn" class="btn danger">🔒 관리자 잠금(ON)</button>
+        <button id="btnFull">전체화면</button>
+<!-- admin-only controls begin -->
+        <div class="adminOnly">
+        <div class="pill" title="PC 시간이 자동동기화 상태면 이 시간이 기준입니다.">
+          <div class="k">현재시각</div>
+          <div class="v" id="nowClock">--:--:--</div>
+        </div>
+
+        <div class="pill">
+          <div class="k">소리</div>
+          <div class="v" id="soundState">OFF</div>
+        </div>
+
+        <div class="pill">
+          <div class="k">안내</div>
+          <div class="v" id="voiceState">OFF</div>
+        </div>
+
+        <div class="pill">
+          <div class="k">1분전 예고</div>
+          <div class="v" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <label><input type="checkbox" id="warnBreakEnd" checked> 휴식 종료</label>
+            <label><input type="checkbox" id="warnMealEnd" checked> 식사 종료</label>
+            <label><input type="checkbox" id="warnClassEnd" checked> 수업 종료</label>
+          </div>
+        </div>
+
+
+
+        <div class="pill">
+          <div class="k">음성 볼륨</div>
+          <div class="v">
+            <input id="voiceVol" type="range" min="0" max="1000" value="300" style="width:160px;" />
+            <span id="voiceVolText" style="display:inline-block; width:46px; text-align:right;">85%</span>
+          </div>
+        </div>
+
+
+
+        <div class="pill">
+          <div class="k">종소리</div>
+          <div class="v">
+            <select id="bellSelect" style="font-size:16px; font-weight:900; border-radius:10px; padding:6px 8px; border:1px solid rgba(255,255,255,.18); background: rgba(0,0,0,.25); color: rgba(255,255,255,.92);">
+              <option value="web_classic" selected>기본(클래식)</option>
+              <option value="web_school">학교종(또렷)</option>
+              <option value="web_soft">부드럽게</option>
+              <option value="web_strong">강하게</option>
+              <option value="mp3_bell">MP3 bell.mp3</option>
+              <option value="mp3_bell1">MP3 bell1.mp3</option>
+              <option value="mp3_bell2">MP3 bell2.mp3</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pill">
+          <div class="k">볼륨</div>
+          <div class="v">
+            <input id="vol" type="range" min="0" max="1000" value="300" style="width:160px;" />
+            <span id="volText" style="display:inline-block; width:46px; text-align:right;">85%</span>
+          </div>
+        </div>
+
+
+        <button id="btnSound">소리 켜기</button>
+        <button id="btnTest">종소리 테스트</button>
+        <button id="btnVoice">안내 음성 켜기</button>
+        
+        <button id="voiceTestBtn" class="btn">안내 음성 테스트</button>
+        <button id="btnDayMode">주말/공휴일 자동</button>
+        
+
+        <button id="themeBtn" class="btn">🌗 테마: 다크</button>
+        <label class="miniOpt"><input type="checkbox" id="themeAuto"> 자동</label>
+        <label class="miniOpt"><input type="checkbox" id="themeLock"> 테마 잠금</label>
+
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="heroTop">
+          <div class="statusBadge"><span class="dot" aria-hidden="true"></span><span id="statusText">운영 시간 확인 중…</span></div>
+          <div class="pill">
+            <div class="k">남은 시간</div>
+            <div class="v" id="remain">--:--</div>
+          </div>
+        </div>
+
+        <div class="heroTitle" id="title">—</div>
+        <p class="heroSubtitle" id="subtitle">시간이 바뀌면 화면이 자동으로 전환되고, 종소리가 울립니다. (소리 사용 시 상단에서 “소리 켜기”를 눌러주세요.)</p>
+
+        <div class="metaRow">
+          <div class="card">
+            <div class="k">현재 구간</div>
+            <div class="v" id="curRange">--:-- ~ --:--</div>
+            <div class="s" id="curInfo">—</div>
+          </div>
+          <div class="card">
+            <div class="k">다음 구간</div>
+            <div class="v" id="nextTitle">—</div>
+            <div class="s" id="nextRange">--:--</div>
+          </div>
+        </div>
+
+        <div class="progressWrap" aria-label="진행률">
+          <div class="progressBar" id="progress"></div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <div class="tableCard logoBg">
+          <div class="tableHead">
+            <h2>오늘 시간표</h2>
+            <div class="small">현재 구간이 자동 강조됩니다</div>
+          </div>
+          <div class="rows" id="rows"></div>
+        </div>
+
+        <!-- OPERATING NOTICE MOVED TO BOTTOM -->
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="font-weight:900;">운영 안내</div>
+            <div class="small">메모는 필요하면 수정 가능</div>
+          </div>
+          <div class="note" style="margin-top:14px; line-height:1.6;">
+            • 평일 및 토요일: <b>2~8교시 의무 학습</b> / 공휴일 및 일요일: <b>자율 등원 학습</b><br/>
+            • 공휴일 및 일요일: <b>식사 배달 서비스 미제공</b><br/>
+            • 화면/종소리 타이밍은 이 PC(또는 TV)의 <b>시계 시간</b>을 기준으로 동작합니다.
+          </div>
+        </div>
+      </aside>
+    </main>
+
+
+    <section class="bottomNotice">
+      <div class="noticeInner">
+        <div class="noticeTitle">운영 안내</div>
+        <div class="noticeBody">
+          • 평일 및 토요일: <b>2~8교시 의무 학습</b> / 공휴일 및 일요일: <b>자율 등원 학습</b><br/>
+          • 공휴일 및 일요일: <b>식사 배달 서비스 미제공</b><br/>
+          • 화면/종소리 타이밍은 이 PC(또는 TV)의 <b>시계 시간</b>을 기준으로 동작합니다.
+        </div>
+      </div>
+    </section>
+
+
+    <footer>
+      <div>조작: <span class="kbd">F11</span> (크롬 전체화면) · <span class="kbd">Ctrl</span>+<span class="kbd">R</span> (새로고침)</div>
+      <div>SPARTA SAM · Songdo Center</div>
+    </footer>
+  </div>
+
+<script>
+/**
+ * SPARTA SAM 송도센터 실시간 시간표 (단일 HTML)
+ * - 실시간 시계 기반으로 현재 구간을 계산
+ * - 구간이 바뀌면 종소리(웹오디오) 재생 (사용자 클릭으로 활성화 필요)
+ * - 전체화면 버튼 제공
+ */
+
+const schedule = [
+  { key:"open0", start:"06:00", end:"08:00", type:"open",  label:"OPEN (0교시)", info:"자율 입실/준비" },
+  { key:"p1",    start:"08:00", end:"08:50", type:"class", label:"1교시", info:"수업/자습" },
+  { key:"b1",    start:"08:50", end:"09:00", type:"break", label:"휴식", info:"이동 시간" },
+  { key:"p2",    start:"09:00", end:"10:15", type:"class", label:"2교시", info:"*의무 학습 시작" },
+  { key:"b2",    start:"10:15", end:"10:30", type:"break", label:"휴식", info:"휴식/이동" },
+  { key:"p3",    start:"10:30", end:"12:00", type:"class", label:"3교시", info:"수업/자습" },
+  { key:"lunch", start:"12:00", end:"13:10", type:"meal",  label:"LUNCH", info:"식사 배달 / 외출 / 개인 도시락" },
+  { key:"p4",    start:"13:10", end:"14:30", type:"class", label:"4교시", info:"수업/자습" },
+  { key:"b3",    start:"14:30", end:"14:45", type:"break", label:"휴식", info:"이동 시간" },
+  { key:"p5",    start:"14:45", end:"16:15", type:"class", label:"5교시", info:"수업/자습" },
+  { key:"b4",    start:"16:15", end:"16:30", type:"break", label:"휴식", info:"이동 시간" },
+  { key:"p6",    start:"16:30", end:"18:00", type:"class", label:"6교시", info:"수업/자습" },
+  { key:"dinner",start:"18:00", end:"19:10", type:"meal",  label:"DINNER", info:"식사 배달 / 외출 / 개인 도시락" },
+  { key:"p7",    start:"19:10", end:"20:40", type:"class", label:"7교시", info:"수업/자습" },
+  { key:"b5",    start:"20:40", end:"20:55", type:"break", label:"휴식", info:"이동 시간" },
+  { key:"p8",    start:"20:55", end:"21:50", type:"class", label:"8교시", info:"**평일 의무 학습 종료" },
+  { key:"b6",    start:"21:50", end:"22:05", type:"break", label:"휴식", info:"이동 시간" },
+  { key:"night", start:"22:05", end:"23:00", type:"night", label:"야간 학습", info:"자율 학습" }
+];
+
+// ---------- helpers ----------
+const $ = (id)=>document.getElementById(id);
+
+function toMin(hhmm){
+  const [h,m] = hhmm.split(":").map(Number);
+  return h*60 + m;
+}
+
+function fmt2(n){ return String(n).padStart(2,"0"); }
+
+function fmtClock(d){
+  return `${fmt2(d.getHours())}:${fmt2(d.getMinutes())}:${fmt2(d.getSeconds())}`;
+}
+
+function fmtRemain(totalSec){
+  totalSec = Math.max(0, Math.floor(totalSec));
+  const m = Math.floor(totalSec/60);
+  const s = totalSec%60;
+  return `${fmt2(m)}:${fmt2(s)}`;
+}
+
+function setMode(type){
+  const map = {
+    class:"mode-class",
+    break:"mode-break",
+    meal:"mode-meal",
+    open:"mode-open",
+    night:"mode-night",
+    off:"mode-off"
+  };
+  document.body.className = map[type] || "mode-off";
+}
+
+// ---------- render table ----------
+function renderRows(){
+  const el = $("rows");
+  el.innerHTML = "";
+  schedule.forEach(item=>{
+    const row = document.createElement("div");
+    row.className = "row";
+    row.dataset.key = item.key;
+    row.innerHTML = `
+      <div class="t">${item.start}</div>
+      <div>
+        <div style="font-weight:900;">${item.label}</div>
+        <div class="l" style="font-size:17px; margin-top:2px;">${item.info || ""}</div>
+      </div>
+      <div class="tag">${tagText(item.type)}</div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function tagText(type){
+  switch(type){
+    case "class": return "수업/의무";
+    case "break": return "휴식";
+    case "meal":  return "식사";
+    case "open":  return "오픈";
+    case "night": return "야간";
+    default:      return "—";
+  }
+}
+
+
+// ---------- day mode (주말/공휴일 자동) ----------
+/**
+ * dayMode:
+ * - "auto": 토요일/일요일/공휴일이면 자율 등원/배달 미제공 배너 표시
+ * - "weekday": 평일 고정
+ * - "holiday": 공휴일/일요일 고정 (자율 모드)
+ */
+let dayMode = "auto";
+const HOLIDAYS = [
+  // 필요하면 날짜를 추가하세요. 형식: "YYYY-MM-DD"
+  // 예) "2026-01-01",
+];
+
+function isHolidayOrWeekend(d){
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  const key = `${yyyy}-${mm}-${dd}`;
+  const dow = d.getDay(); // 0 Sun .. 6 Sat
+  const weekend = (dow === 0 || dow === 6);
+  const holiday = HOLIDAYS.includes(key);
+  return { weekend, holiday, key, isOff: weekend || holiday };
+}
+
+function updateBanner(d){
+  const b = $("banner");
+  const modeText = $("dayModeText");
+  const sub = $("dayModeSub");
+
+  const st = isHolidayOrWeekend(d);
+  let off = false;
+
+  if(dayMode === "auto") off = st.isOff;
+  if(dayMode === "holiday") off = true;
+  if(dayMode === "weekday") off = false;
+
+  if(off){
+    b.style.display = "block";
+    modeText.textContent = (st.holiday ? "공휴일" : (d.getDay()===0 ? "일요일" : "주말")) + " 자율 등원";
+    sub.textContent = "공휴일/일요일: 식사 배달 서비스 미제공";
+  }else{
+    b.style.display = "none";
+  }
+  return off;
+}
+
+// ---------- voice 안내 (Web Speech API) ----------
+let voiceEnabled = false;
+let voiceVolume = 3.0; // 0~10 (UI 0~1000%)
+const bellLengthMult = 10.0; // 종소리 길이 약 10초
+
+function speak(text){
+  if(!voiceEnabled) return;
+  if(!("speechSynthesis" in window)) return;
+  try{
+    // 너무 겹치면 끊고 새로
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ko-KR";
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.volume = 1.0; u._spartaGain = voiceVolume;
+    window.speechSynthesis.speak(u);
+  }catch(e){
+    // 무시
+  }
+}
+
+// ---------- optional MP3 bell ----------
+/**
+ * 같은 폴더에 bell.mp3 를 넣어두면 자동으로 그 파일을 우선 재생합니다.
+ * 없으면 기존 WebAudio 벨(더 큰 볼륨)로 재생합니다.
+ */
+let bellMp3 = null;
+let bellMp3Ready = false;
+
+async function probeBellMp3(filename="bell.mp3"){
+  // 지정 파일이 실제로 존재하는지 확인(없으면 WebAudio로 자동 fallback)
+  try{
+    const res = await fetch(filename, { method: "HEAD", cache: "no-store" });
+    bellMp3Ready = res.ok;
+  }catch(e){
+    bellMp3Ready = false;
+  }
+  if(bellMp3Ready){
+    if(!bellMp3 || bellMp3.src.indexOf(filename) === -1){
+      bellMp3 = new Audio(filename);
+      bellMp3.preload = "auto";
+    }
+    bellMp3.volume = Math.max(0, Math.min(1, bellVolume)); // 0~1
+  }else{
+    bellMp3 = null;
+  }
+}
+
+function resetBellMp3(){
+  bellMp3Ready = false;
+  bellMp3 = null;
+}
+
+
+// ---------- audio (WebAudio, user gesture needed) ----------
+let audioCtx = null;
+let soundEnabled = false;
+let bellProfile = 'web_classic';
+let bellVolume = 3.0; // 0~10 (UI 0~1000%)
+
+
+function ensureAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // TV/스피커에서 더 또렷하게 들리도록 컴프레서(리미터) 추가
+    const comp = audioCtx.createDynamicsCompressor();
+    comp.threshold.setValueAtTime(-20, audioCtx.currentTime);
+    comp.knee.setValueAtTime(18, audioCtx.currentTime);
+    comp.ratio.setValueAtTime(8, audioCtx.currentTime);
+    comp.attack.setValueAtTime(0.003, audioCtx.currentTime);
+    comp.release.setValueAtTime(0.12, audioCtx.currentTime);
+    audioCtx._spartaCompressor = comp;
+  }
+}
+
+function beep(freq=880, dur=0.16, gain=0.85, when=0, wave="sine"){
+  if(!soundEnabled || !audioCtx) return;
+
+  const master = 4.0; // 기본 마스터(리미터 적용)
+  gain = Math.max(0.02, Math.min(12.0, gain * bellVolume * master));
+
+  // 종소리 길이 조정(기본 대비 5배)
+  dur = Math.max(0.05, dur * bellLengthMult);
+
+  const t0 = audioCtx.currentTime + when;
+
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = wave;
+  osc.frequency.value = freq;
+
+  // attack/release(종 느낌)
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(gain, t0 + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+  // 하모닉(명료도)
+  const osc2 = audioCtx.createOscillator();
+  const g2 = audioCtx.createGain();
+  osc2.type = (wave === "sine") ? "triangle" : "sine";
+  osc2.frequency.value = freq*2;
+  g2.gain.setValueAtTime(0.0001, t0);
+  g2.gain.exponentialRampToValueAtTime(gain*0.22, t0 + 0.008);
+  g2.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+  osc.connect(g);
+  osc2.connect(g2);
+
+  const comp = audioCtx._spartaCompressor;
+  g.connect(comp);
+  g2.connect(comp);
+  comp.connect(audioCtx.destination);
+
+  osc.start(t0);   osc.stop(t0 + dur + 0.03);
+  osc2.start(t0);  osc2.stop(t0 + dur + 0.03);
+}
+
+function clickNoise(when=0, gain=0.6){
+  if(!soundEnabled || !audioCtx) return;
+  const t0 = audioCtx.currentTime + when;
+
+  const bufferSize = audioCtx.sampleRate * 0.02; // 20ms
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){
+    // 짧게 감쇠하는 노이즈
+    data[i] = (Math.random()*2-1) * Math.exp(-i/(bufferSize/5));
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+
+  const g = audioCtx.createGain();
+  const master = 4.0;
+  g.gain.setValueAtTime(Math.min(12.0, gain * bellVolume * master), t0);
+  src.connect(g);
+
+  const comp = audioCtx._spartaCompressor;
+  g.connect(comp);
+  comp.connect(audioCtx.destination);
+
+  src.start(t0);
+  src.stop(t0 + 0.03);
+}
+
+
+
+function playBell(type){
+  // 선택된 프로필에 따라 MP3/WebAudio 중 재생
+  if(soundEnabled && bellProfile.startsWith("mp3_")){
+    const fname = (bellProfile === "mp3_bell1") ? "bell1.mp3"
+                : (bellProfile === "mp3_bell2") ? "bell2.mp3"
+                : "bell.mp3";
+
+    // 파일 존재 확인 후 재생(없으면 WebAudio로 fallback)
+    probeBellMp3(fname);
+    if(bellMp3Ready && bellMp3){
+      bellMp3.volume = Math.max(0, Math.min(1, bellVolume));
+      bellMp3.currentTime = 0;
+      bellMp3.play().catch(()=> resetBellMp3());
+      return;
+    }
+  }
+
+  // 유형별 패턴(프로필별로 '완전히 다른' 느낌)
+  const p = bellProfile;
+
+  // 프로필 정의
+  const classic = (p === "web_classic"); // 딩-동
+  const school  = (p === "web_school");  // 학교종(4타)
+  const soft    = (p === "web_soft");    // 부드러운 1~2타(낮은 음, 길게)
+  const strong  = (p === "web_strong");  // 강하게(노이즈 클릭 + 빠른 3타)
+
+  // 파형(재질)도 다르게
+  const wave = classic ? "sine" : school ? "triangle" : soft ? "sine" : "square";
+
+  switch(type){
+    case "class": // 수업 시작
+      if(classic){
+        // 딩-동(두 음)
+        beep(988, 0.22, 0.95, 0.00, wave);
+        beep(784, 0.28, 0.95, 0.30, wave);
+      }else if(school){
+        // 학교종 4타 (명확한 리듬)
+        beep(988, 0.18, 0.95, 0.00, wave);
+        beep(988, 0.18, 0.95, 0.24, wave);
+        beep(1175,0.20, 0.90, 0.52, wave);
+        beep(1319,0.22, 0.88, 0.80, wave);
+      }else if(soft){
+        // 낮은 음 1타(길게)
+        beep(659, 0.42, 0.70, 0.00, wave);
+        beep(784, 0.28, 0.55, 0.46, "triangle");
+      }else if(strong){
+        // 클릭 + 3타(강)
+        clickNoise(0.00, 0.55);
+        beep(1047,0.16, 1.00, 0.02, wave);
+        clickNoise(0.22, 0.50);
+        beep(1319,0.16, 1.00, 0.24, wave);
+        clickNoise(0.44, 0.45);
+        beep(1568,0.18, 0.95, 0.46, wave);
+      }
+      break;
+
+    case "break": // 쉬는 시간
+      if(classic){
+        beep(784, 0.14, 0.85, 0.00, wave);
+        beep(784, 0.14, 0.85, 0.18, wave);
+      }else if(school){
+        beep(659, 0.12, 0.90, 0.00, wave);
+        beep(659, 0.12, 0.90, 0.16, wave);
+        beep(523, 0.14, 0.85, 0.36, wave);
+      }else if(soft){
+        beep(523, 0.30, 0.60, 0.00, "sine");
+      }else if(strong){
+        clickNoise(0.00, 0.45);
+        beep(880, 0.12, 0.95, 0.02, wave);
+        clickNoise(0.18, 0.40);
+        beep(880, 0.12, 0.95, 0.20, wave);
+      }
+      break;
+
+    case "meal":  // 식사
+      if(classic){
+        beep(659, 0.18, 0.85, 0.00, wave);
+        beep(523, 0.18, 0.80, 0.22, wave);
+        beep(659, 0.18, 0.85, 0.44, wave);
+      }else if(school){
+        beep(523, 0.18, 0.85, 0.00, wave);
+        beep(659, 0.18, 0.88, 0.22, wave);
+        beep(784, 0.20, 0.90, 0.48, wave);
+      }else if(soft){
+        beep(440, 0.46, 0.62, 0.00, "sine");
+        beep(523, 0.28, 0.50, 0.50, "triangle");
+      }else if(strong){
+        clickNoise(0.00, 0.50);
+        beep(740, 0.14, 1.00, 0.02, wave);
+        clickNoise(0.22, 0.45);
+        beep(988, 0.14, 1.00, 0.24, wave);
+        clickNoise(0.44, 0.40);
+        beep(1319,0.18, 0.95, 0.46, wave);
+      }
+      break;
+
+    case "open":
+      if(soft){
+        beep(440, 0.40, 0.55, 0.00, "sine");
+      }else{
+        beep(523, 0.22, 0.80, 0.00, wave);
+      }
+      break;
+
+    case "night":
+      if(soft){
+        beep(392, 0.42, 0.55, 0.00, "sine");
+      }else{
+        beep(880, 0.16, 0.75, 0.00, wave);
+        beep(740, 0.18, 0.70, 0.22, wave);
+      }
+      break;
+
+    default:
+      beep(880, 0.18, 0.75, 0.00, wave);
+  }
+}
+
+// ---------- core ticker ----------
+let lastKey = null;
+
+function findCurrent(minNow){
+  for(let i=0;i<schedule.length;i++){
+    const it = schedule[i];
+    const s = toMin(it.start);
+    const e = toMin(it.end);
+    if(minNow >= s && minNow < e) return {item: it, index: i};
+  }
+  return null;
+}
+
+function tick(){
+  const now = new Date();
+  const offDay = updateBanner(now);
+  $("nowClock").textContent = fmtClock(now);
+
+  const minNow = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
+  const found = findCurrent(minNow);
+
+  if(!found){
+    // 운영 외
+    setMode("off");
+    $("statusText").textContent = "운영 시간 외";
+    $("title").textContent = "운영 시간 외";
+    $("subtitle").textContent = "현재는 시간표 범위(06:00~23:00) 밖입니다.";
+    $("curRange").textContent = "--:-- ~ --:--";
+    $("curInfo").textContent = "—";
+    $("nextTitle").textContent = schedule[0]?.label || "—";
+    $("nextRange").textContent = schedule[0] ? `${schedule[0].start} ~ ${schedule[0].end}` : "--:--";
+    $("remain").textContent = "--:--";
+    $("progress").style.width = "0%";
+    highlightRow(null);
+    lastKey = null;
+    return;
+  }
+
+  const it = found.item;
+  setMode(it.type);
+
+  // 상태 텍스트
+  const status = (it.type === "class") ? "수업/의무 학습 진행 중"
+                : (it.type === "break") ? "쉬는 시간"
+                : (it.type === "meal")  ? "식사 시간"
+                : (it.type === "open")  ? "오픈 시간"
+                : (it.type === "night") ? "야간 학습"
+                : "진행 중";
+  $("statusText").textContent = status;
+
+  $("title").textContent = it.label;
+  // 공휴일/일요일에는 배달 미제공 안내를 식사 구간에 더 강조
+  if(offDay && it.type==="meal"){
+    $("subtitle").textContent = (it.info || "") + "  ·  (공휴일/일요일 배달 미제공)";
+  }else{
+    $("subtitle").textContent = it.info || "—";
+  }
+  $("curRange").textContent = `${it.start} ~ ${it.end}`;
+  $("curInfo").textContent = `구간 타입: ${tagText(it.type)}`;
+
+  // 다음 구간
+  const next = schedule[found.index + 1] || null;
+  $("nextTitle").textContent = next ? next.label : "마지막 구간";
+  $("nextRange").textContent = next ? `${next.start} ~ ${next.end}` : "—";
+
+  // 남은 시간 + 진행률
+  const endMin = toMin(it.end);
+  const remainSec = (endMin - minNow) * 60;
+  $("remain").textContent = fmtRemain(remainSec);
+
+  const startMin = toMin(it.start);
+  const prog = (minNow - startMin) / (endMin - startMin);
+  $("progress").style.width = `${Math.max(0, Math.min(1, prog))*100}%`;
+
+  highlightRow(it.key);
+
+  // 구간 변경 시 종소리
+  if(lastKey !== it.key){
+    // 전환 연출(짧은 플래시)
+    document.body.classList.add("flash");
+    setTimeout(()=>document.body.classList.remove("flash"), 260);
+
+    // 종소리
+    playBell(it.type);
+
+    // 안내 음성 (구간 시작 시)
+    const say = (it.type==="class") ? `지금부터 ${it.label}를 시작합니다. 집중해주세요.` :
+                (it.type==="break") ? `${it.label}입니다. 이동하고 휴식하세요.` :
+                (it.type==="meal")  ? `${it.label} 시간입니다. 식사하고 재정비하세요.` :
+                (it.type==="open")  ? `${it.label} 입니다.` :
+                (it.type==="night") ? `${it.label}입니다. 조용히 자율학습하세요.` :
+                `${it.label} 입니다.`;
+    speak(say);
+
+    lastKey = it.key;
+  }
+}
+
+function highlightRow(key){
+  document.querySelectorAll(".row").forEach(r=>{
+    r.classList.toggle("active", key && r.dataset.key === key);
+  });
+}
+
+// ---------- buttons ----------
+$("btnSound").addEventListener("click", async ()=>{
+  ensureAudio();
+  try{
+    await audioCtx.resume();
+    soundEnabled = !soundEnabled;
+    // bell.mp3가 있으면 자동 사용
+    probeBellMp3('bell.mp3');
+$('volText').textContent = `${$('vol').value}%`;
+    $("soundState").textContent = soundEnabled ? "ON" : "OFF";
+    $("btnSound").textContent = soundEnabled ? "소리 끄기" : "소리 켜기";
+    if(soundEnabled){ playBell("class"); speak("종소리가 켜졌습니다."); }
+  }catch(e){
+    alert("소리를 켤 수 없습니다. 브라우저 설정/권한을 확인해주세요.");
+  }
+});
+
+$("btnTest").addEventListener("click", ()=>{
+  ensureAudio();
+  if(!soundEnabled){
+    alert("먼저 '소리 켜기'를 눌러주세요.");
+    return;
+  }
+  playBell("class");
+  setTimeout(()=>playBell("break"), 600);
+  setTimeout(()=>playBell("meal"),  1200);
+});
+
+
+$("btnVoice").addEventListener("click", ()=>{
+  voiceEnabled = !voiceEnabled;
+  $("voiceState").textContent = voiceEnabled ? "ON" : "OFF";
+  $("btnVoice").textContent = voiceEnabled ? "안내 음성 끄기" : "안내 음성 켜기";
+  if(voiceEnabled){
+    speak("안내 음성이 켜졌습니다.");
+  }else{
+    if("speechSynthesis" in window) window.speechSynthesis.cancel();
+  }
+});
+
+$("btnDayMode").addEventListener("click", ()=>{
+  // auto -> weekday -> holiday -> auto 순환
+  dayMode = (dayMode==="auto") ? "weekday" : (dayMode==="weekday") ? "holiday" : "auto";
+  const label = (dayMode==="auto") ? "주말/공휴일 자동"
+              : (dayMode==="weekday") ? "평일 고정"
+              : "공휴일/일요일 고정";
+  $("btnDayMode").textContent = label;
+  // 즉시 반영
+  updateBanner(new Date());
+});
+
+
+$("btnFull").addEventListener("click", async ()=>{
+  const el = document.documentElement;
+  try{
+    if(!document.fullscreenElement){
+      await el.requestFullscreen();
+    }else{
+      await document.exitFullscreen();
+    }
+  }catch(e){
+    // 무시
+  }
+});
+
+
+// bell selector + volume
+// voice volume
+$("voiceVol").addEventListener("input", ()=>{
+  const v = Number($("voiceVol").value);
+  voiceVolume = Math.max(0, Math.min(10, v/100));
+  $("voiceVolText").textContent = `${v}%`;
+});
+
+
+$("bellSelect").addEventListener("change", ()=>{
+  bellProfile = $("bellSelect").value;
+  // MP3 선택 시 즉시 존재 여부 확인(없으면 자동 fallback)
+  if(bellProfile.startsWith("mp3_")){
+    const fname = (bellProfile === "mp3_bell1") ? "bell1.mp3"
+                : (bellProfile === "mp3_bell2") ? "bell2.mp3"
+                : "bell.mp3";
+    probeBellMp3(fname);
+  }
+});
+
+$("vol").addEventListener("input", ()=>{
+  const v = Number($("vol").value);
+  bellVolume = Math.max(0, Math.min(10, v/100));
+  $("volText").textContent = `${v}%`;
+  if(bellMp3) bellMp3.volume = Math.max(0, Math.min(1, bellVolume));
+});
+
+
+// init
+renderRows();
+probeBellMp3('bell.mp3');
+$('volText').textContent = `${$('vol').value}%`;
+tick();
+setInterval(tick, 1000);
+</script>
+<div id="toast"></div>
+<script>
+
+/* ===============================
+   v4.6 운영기능 패치 (v4 스크립트 보존)
+   =============================== */
+(function(){
+  const ADMIN_PASSWORD = "sam1101!";
+  let adminLocked = true;
+
+  let warnBreakEnd = true;
+  let warnMealEnd  = true;
+  let warnClassEnd = true;
+
+  const toastEl = document.getElementById("toast");
+  let toastTimer = null;
+  function toast(msg){
+    if(!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toastEl.classList.remove("show"), 1300);
+  }
+
+  function setLockUI(){
+    const root = document.documentElement;
+    if(root) root.classList.toggle('admin-on', !adminLocked);
+
+    const btn = document.getElementById("adminLockBtn");
+    if(btn){
+      btn.classList.toggle("on", adminLocked);
+      btn.textContent = adminLocked ? "🔒 관리자 잠금(ON)" : "🔓 관리자 잠금(OFF)";
+    }
+  }
+
+  function intercept(e){
+    if(!adminLocked) return;
+    const t = e.target;
+    if(!t) return;
+    const id = t.id || "";
+    if(id === "adminLockBtn" || id === "btnFull" || id==="themeBtn" || id==="themeAuto" || id==="themeLock") return;
+
+    const top = document.querySelector(".topRight");
+    if(top && top.contains(t) && (t.closest("button,input,select") || ["BUTTON","INPUT","SELECT"].includes(t.tagName))){
+      e.preventDefault();
+      e.stopPropagation();
+      toast("관리자 잠금 상태입니다. 잠금 해제 후 조작하세요.");
+    }
+  }
+
+  function bindLock(){
+    const btn = document.getElementById("adminLockBtn");
+    if(btn){
+      btn.addEventListener("click", ()=>{
+        if(adminLocked){
+          const pw = prompt("관리자 비밀번호를 입력하세요:");
+          if(pw === null) return;
+          if(pw !== ADMIN_PASSWORD){
+            alert("비밀번호가 올바르지 않습니다.");
+            return;
+          }
+          adminLocked = false;
+          toast("잠금 해제됨");
+        }else{
+          adminLocked = true;
+          toast("잠금 설정됨");
+        }
+        setLockUI();
+      });
+    }
+    document.addEventListener("click", intercept, true);
+    document.addEventListener("change", intercept, true);
+    setLockUI();
+  }
+
+  function speakKo(text){
+    try{
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "ko-KR";
+      u.volume = 1.0;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+      window.speechSynthesis.speak(u);
+    }catch(e){
+      console.warn(e);
+      alert("안내 음성이 재생되지 않습니다. Windows + Chrome 최신 버전을 권장합니다.");
+    }
+  }
+
+  function bindVoiceTest(){
+    const vtb = document.getElementById("voiceTestBtn");
+    if(vtb){
+      vtb.addEventListener("click", ()=>{
+        if(adminLocked){
+          toast("잠금 해제 후 테스트할 수 있어요.");
+          return;
+        }
+        speakKo("안내 음성 테스트입니다. 현재 음성 볼륨과 발음을 확인해 주세요.");
+      });
+    }
+  }
+
+  function bindVoiceVol(){
+    const el = document.getElementById("voiceVol");
+    const tx = document.getElementById("voiceVolText");
+    if(!el) return;
+    const sync=()=>{ if(tx) tx.textContent = `${el.value}%`; };
+    sync();
+    el.addEventListener("input", sync);
+  }
+
+  function bindWarnToggles(){
+    const wbe = document.getElementById("warnBreakEnd");
+    const wme = document.getElementById("warnMealEnd");
+    const wce = document.getElementById("warnClassEnd");
+    if(wbe) wbe.addEventListener("change", ()=> warnBreakEnd = wbe.checked);
+    if(wme) wme.addEventListener("change", ()=> warnMealEnd  = wme.checked);
+    if(wce) wce.addEventListener("change", ()=> warnClassEnd = wce.checked);
+  }
+
+  function toSec(hhmm){
+    const [h,m]=hhmm.split(":").map(n=>parseInt(n,10));
+    return h*3600+m*60;
+  }
+  function nowSec(){
+    const d=new Date();
+    return d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds();
+  }
+  function todayKey(){
+    const d=new Date();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  let lastWarnKey = "";
+  function checkWarn(){
+    try{
+      if(typeof schedule === "undefined" || !Array.isArray(schedule)) return;
+      const n = nowSec();
+      for(const seg of schedule){
+        if(!seg || !seg.key || !seg.start || !seg.end) continue;
+        const end = toSec(seg.end);
+        const trig = end - 60;
+        if(n === trig){
+          const typ = (seg.type||"").toLowerCase();
+          const ok =
+            (typ==="break" && warnBreakEnd) ||
+            (typ==="meal"  && warnMealEnd)  ||
+            (typ==="class" && warnClassEnd);
+          const k = `${todayKey()}|${seg.key}`;
+          if(ok && lastWarnKey !== k){
+            lastWarnKey = k;
+
+            // 기존 종소리 테스트와 같은 루트로 실행되도록 'btnTest' 클릭을 트리거
+            try{
+              const testBtn = document.getElementById("btnTest");
+              if(testBtn){
+                testBtn.click();
+              }else if(typeof playBell === "function"){
+                playBell(typ);
+              }
+            }catch(e){}
+
+            let msg = "";
+            if(typ==="break") msg = "휴식 종료 1분 전입니다. 잠시 후 다음 교시가 시작됩니다.";
+            else if(typ==="meal") msg = "식사 시간 종료 1분 전입니다. 잠시 후 다음 교시가 시작됩니다.";
+            else msg = "수업 종료 1분 전입니다. 잠시 후 다음 교시로 전환됩니다.";
+            speakKo(msg);
+          }
+        }
+      }
+    }catch(e){}
+  }
+
+  function start(){
+    bindLock();
+    bindVoiceTest();
+    bindVoiceVol();
+    bindWarnToggles();
+    setInterval(checkWarn, 1000);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", start);
+  }else{
+    start();
+  }
+})();
+
+</script>
+
+<script>
+/* ===== 테마 컨트롤 (사용자 선택/자동/잠금) ===== */
+(function(){
+  const root = document.documentElement;
+  const btn  = document.getElementById("themeBtn");
+  const auto = document.getElementById("themeAuto");
+  const lock = document.getElementById("themeLock");
+
+  const THEMES = ["dark","light","contrast"];
+  const labels = {dark:"다크", light:"라이트", contrast:"고대비"};
+
+  function applyTheme(theme){
+    root.classList.remove("theme-light","theme-contrast");
+    if(theme==="light") root.classList.add("theme-light");
+    if(theme==="contrast") root.classList.add("theme-contrast");
+    if(btn) btn.textContent = `🌗 테마: ${labels[theme]||"다크"}`;
+  }
+
+  function getStored(){
+    return {
+      theme: localStorage.getItem("sparta_theme") || "dark",
+      auto:  (localStorage.getItem("sparta_theme_auto") || "0") === "1",
+      lock:  (localStorage.getItem("sparta_theme_lock") || "0") === "1"
+    };
+  }
+  function store({theme, autoOn, lockOn}){
+    if(theme) localStorage.setItem("sparta_theme", theme);
+    localStorage.setItem("sparta_theme_auto", autoOn ? "1":"0");
+    localStorage.setItem("sparta_theme_lock", lockOn ? "1":"0");
+  }
+
+  function pickAutoThemeByTime(){
+    const d = new Date();
+    const h = d.getHours();
+    // 기본: 07~18 라이트, 그 외 다크 (원하면 쉽게 변경 가능)
+    return (h >= 7 && h < 18) ? "light" : "dark";
+  }
+
+  function refresh(){
+    const s = getStored();
+    if(auto) auto.checked = s.auto;
+    if(lock) lock.checked = s.lock;
+
+    const theme = s.auto ? pickAutoThemeByTime() : s.theme;
+    applyTheme(theme);
+  }
+
+  // 테마 변경(순환)
+  function cycleTheme(){
+    const s = getStored();
+    const current = s.theme;
+    const idx = Math.max(0, THEMES.indexOf(current));
+    const next = THEMES[(idx + 1) % THEMES.length];
+    store({theme: next, autoOn: false, lockOn: s.lock});
+    if(auto) auto.checked = false;
+    applyTheme(next);
+  }
+
+  // 잠금 정책:
+  // - themeLock 체크 ON이면: 관리자 잠금(기본 기능) 해제 상태에서만 변경 허용
+  // - themeLock OFF면: 누구나 변경 가능(전광판 설치 환경에 따라 선택)
+  function isAdminUnlocked(){
+    // v4.6 패치 변수는 클로저라 접근 불가. 대신 UI 토스트 방식에서 "관리자 잠금(OFF)" 텍스트로 판별
+    const adminBtn = document.getElementById("adminLockBtn");
+    return adminBtn && adminBtn.textContent.includes("(OFF)");
+  }
+
+  if(btn){
+    btn.addEventListener("click", ()=>{
+      const s = getStored();
+      if(s.lock && !isAdminUnlocked()){
+        // 잠금 켜진 상태에서는 관리자 잠금 해제 필요
+        try{
+          const t = document.getElementById("toast");
+          if(t){ t.textContent="테마 잠금 상태입니다. 관리자 잠금 해제 후 변경하세요."; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1300); }
+          else alert("테마 잠금 상태입니다. 관리자 잠금 해제 후 변경하세요.");
+        }catch(e){}
+        return;
+      }
+      cycleTheme();
+    });
+  }
+
+  if(auto){
+    auto.addEventListener("change", ()=>{
+      const s = getStored();
+      store({theme: s.theme, autoOn: auto.checked, lockOn: s.lock});
+      refresh();
+    });
+  }
+
+  if(lock){
+    lock.addEventListener("change", ()=>{
+      const s = getStored();
+      store({theme: s.theme, autoOn: s.auto, lockOn: lock.checked});
+    });
+  }
+
+  // 자동 모드면 매 분마다 테마 재평가(시간대 넘어갈 때 자동 전환)
+  setInterval(()=>{
+    const s = getStored();
+    if(s.auto) refresh();
+  }, 60*1000);
+
+  refresh();
+})();
+</script>
+
+
+<div id="fsPrompt">
+  <div class="box">
+    <div class="title">전체화면으로 전환할까요?</div>
+    <div class="desc">전광판/TV에서는 전체화면을 권장합니다.<br/>아무 곳이나 한 번 터치해도 전체화면으로 전환됩니다.</div>
+    <div class="actions">
+      <button id="fsGoBtn">전체화면</button>
+      <button id="fsLaterBtn" class="secondary">나중에</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ===== v4.7.4: (1) 새로고침 방지 (2) 전원ON 후 자동 전체화면 유도 ===== */
+(function(){
+  const toast = (msg)=>{
+    const t=document.getElementById("toast");
+    if(t){ t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1300); }
+    else alert(msg);
+  };
+
+  // (1) 새로고침/강력새로고침/닫기 방지(키 입력 차단)
+  const blockKeys = (e)=>{
+    const k = e.key;
+    const ctrl = e.ctrlKey || e.metaKey;
+    const shift = e.shiftKey;
+
+    const isRefresh =
+      k === "F5" ||
+      (ctrl && (k.toLowerCase() === "r" || k.toLowerCase() === "w")) || // Ctrl+R, Ctrl+W
+      (ctrl && shift && k.toLowerCase() === "r"); // Ctrl+Shift+R
+
+    if(isRefresh){
+      e.preventDefault();
+      e.stopPropagation();
+      toast("새로고침/종료가 차단되었습니다. (관리자만 조작)");
+      return false;
+    }
+  };
+  window.addEventListener("keydown", blockKeys, {capture:true});
+
+  // 탭/창 닫기 경고(완전 차단은 불가, 브라우저 정책)
+  window.addEventListener("beforeunload", (e)=>{
+    // 관리자 모드(잠금해제)면 막지 않음
+    const root=document.documentElement;
+    const adminOn = root.classList.contains("admin-on");
+    if(adminOn) return;
+    e.preventDefault();
+    e.returnValue = "";
+  });
+
+  // (2) 자동 전체화면 유도: 전원 켜져서 다시 열릴 때 "첫 터치"로 전체화면 진입
+  const fsPrompt = document.getElementById("fsPrompt");
+  const fsGoBtn  = document.getElementById("fsGoBtn");
+  const fsLaterBtn = document.getElementById("fsLaterBtn");
+
+  function requestFs(){
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if(req) req.call(el).catch(()=>{});
+  }
+  function isFs(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  }
+  function showPrompt(){
+    if(!fsPrompt) return;
+    fsPrompt.style.display = "flex";
+  }
+  function hidePrompt(){
+    if(!fsPrompt) return;
+    fsPrompt.style.display = "none";
+  }
+
+  // 첫 터치로 전체화면: "사용자 제스처" 요구를 충족하기 위해 one-time listener 사용
+  function armOneTapFullscreen(){
+    const handler = ()=>{
+      hidePrompt();
+      if(!isFs()) requestFs();
+      window.removeEventListener("pointerdown", handler, true);
+      window.removeEventListener("touchstart", handler, true);
+      window.removeEventListener("mousedown", handler, true);
+    };
+    window.addEventListener("pointerdown", handler, true);
+    window.addEventListener("touchstart", handler, true);
+    window.addEventListener("mousedown", handler, true);
+  }
+
+  // 페이지 로드시 전체화면이 아니면 안내를 띄우고, 첫 터치로 진입
+  window.addEventListener("load", ()=>{
+    // 모바일에서 주소창 자동 숨김 유도
+    setTimeout(()=>window.scrollTo(0,1), 50);
+
+    if(!isFs()){
+      showPrompt();
+      armOneTapFullscreen();
+    }
+  });
+
+  if(fsGoBtn){
+    fsGoBtn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      hidePrompt();
+      requestFs();
+    });
+  }
+  if(fsLaterBtn){
+    fsLaterBtn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      hidePrompt();
+      toast("전체화면은 우측 '전체화면' 버튼으로 언제든 켤 수 있어요.");
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
