@@ -1849,122 +1849,13 @@ setInterval(tick, 1000);
   refresh();
 })();
 </script>
-
-
-<div id="fsPrompt">
-  <div class="box">
-    <div class="title">전체화면으로 전환할까요?</div>
-    <div class="desc">전광판/TV에서는 전체화면을 권장합니다.<br/>아무 곳이나 한 번 터치해도 전체화면으로 전환됩니다.</div>
+<div class="desc">전광판/TV에서는 전체화면을 권장합니다.<br/>아무 곳이나 한 번 터치해도 전체화면으로 전환됩니다.</div>
     <div class="actions">
       <button id="fsGoBtn">전체화면</button>
       <button id="fsLaterBtn" class="secondary">나중에</button>
     </div>
   </div>
 </div>
-
-
-<script>
-/* ===== v4.7.4: (1) 새로고침 방지 (2) 전원ON 후 자동 전체화면 유도 ===== */
-(function(){
-  const toast = (msg)=>{
-    const t=document.getElementById("toast");
-    if(t){ t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1300); }
-    else alert(msg);
-  };
-
-  // (1) 새로고침/강력새로고침/닫기 방지(키 입력 차단)
-  const blockKeys = (e)=>{
-    const k = e.key;
-    const ctrl = e.ctrlKey || e.metaKey;
-    const shift = e.shiftKey;
-
-    const isRefresh =
-      k === "F5" ||
-      (ctrl && (k.toLowerCase() === "r" || k.toLowerCase() === "w")) || // Ctrl+R, Ctrl+W
-      (ctrl && shift && k.toLowerCase() === "r"); // Ctrl+Shift+R
-
-    if(isRefresh){
-      e.preventDefault();
-      e.stopPropagation();
-      toast("새로고침/종료가 차단되었습니다. (관리자만 조작)");
-      return false;
-    }
-  };
-  window.addEventListener("keydown", blockKeys, {capture:true});
-
-  // 탭/창 닫기 경고(완전 차단은 불가, 브라우저 정책)
-  window.addEventListener("beforeunload", (e)=>{
-    // 관리자 모드(잠금해제)면 막지 않음
-    const root=document.documentElement;
-    const adminOn = root.classList.contains("admin-on");
-    if(adminOn) return;
-    e.preventDefault();
-    e.returnValue = "";
-  });
-
-  // (2) 자동 전체화면 유도: 전원 켜져서 다시 열릴 때 "첫 터치"로 전체화면 진입
-  const fsPrompt = document.getElementById("fsPrompt");
-  const fsGoBtn  = document.getElementById("fsGoBtn");
-  const fsLaterBtn = document.getElementById("fsLaterBtn");
-
-  function requestFs(){
-    const el = document.documentElement;
-    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-    if(req) req.call(el).catch(()=>{});
-  }
-  function isFs(){
-    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-  }
-  function showPrompt(){
-    if(!fsPrompt) return;
-    fsPrompt.style.display = "flex";
-  }
-  function hidePrompt(){
-    if(!fsPrompt) return;
-    fsPrompt.style.display = "none";
-  }
-
-  // 첫 터치로 전체화면: "사용자 제스처" 요구를 충족하기 위해 one-time listener 사용
-  function armOneTapFullscreen(){
-    const handler = ()=>{
-      hidePrompt();
-      if(!isFs()) requestFs();
-      window.removeEventListener("pointerdown", handler, true);
-      window.removeEventListener("touchstart", handler, true);
-      window.removeEventListener("mousedown", handler, true);
-    };
-    window.addEventListener("pointerdown", handler, true);
-    window.addEventListener("touchstart", handler, true);
-    window.addEventListener("mousedown", handler, true);
-  }
-
-  // 페이지 로드시 전체화면이 아니면 안내를 띄우고, 첫 터치로 진입
-  window.addEventListener("load", ()=>{
-    // 모바일에서 주소창 자동 숨김 유도
-    setTimeout(()=>window.scrollTo(0,1), 50);
-
-    if(!isFs()){
-      showPrompt();
-      armOneTapFullscreen();
-    }
-  });
-
-  if(fsGoBtn){
-    fsGoBtn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      hidePrompt();
-      requestFs();
-    });
-  }
-  if(fsLaterBtn){
-    fsLaterBtn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      hidePrompt();
-      toast("전체화면은 우측 '전체화면' 버튼으로 언제든 켤 수 있어요.");
-    });
-  }
-})();
-</script>
 
 
 <script>
@@ -2171,6 +2062,43 @@ setInterval(tick, 1000);
     if(!modal.classList.contains("show")) return;
     if(e.key === "Escape"){ e.preventDefault(); close(null); }
     if(e.key === "Enter"){ e.preventDefault(); close(input ? input.value : ""); }
+  });
+})();
+</script>
+
+
+<script>
+/* ===== v3: 전체화면은 버튼으로만 (자동 전환/질문 제거) ===== */
+(function(){
+  function requestFullscreenSafe(){
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if(req) req.call(el).catch(()=>{});
+  }
+  function exitFullscreenSafe(){
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if(exit) exit.call(document).catch(()=>{});
+  }
+  function isFs(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  }
+
+  window.addEventListener("load", ()=>{
+    const btn = document.getElementById("btnFull");
+    if(!btn) return;
+    // 버튼 텍스트도 상태에 맞춰 갱신
+    const sync = ()=>{
+      btn.textContent = isFs() ? "전체화면 종료" : "전체화면";
+    };
+    document.addEventListener("fullscreenchange", sync);
+    document.addEventListener("webkitfullscreenchange", sync);
+    sync();
+
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      if(isFs()) exitFullscreenSafe();
+      else requestFullscreenSafe();
+    }, {passive:false});
   });
 })();
 </script>
