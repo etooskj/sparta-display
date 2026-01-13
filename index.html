@@ -1,3 +1,4 @@
+<!-- BUILD: 2026-01-13T06:34:39.598887 -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -312,8 +313,29 @@
       white-space:nowrap;
     }
     .row.active{
-      border-color: rgba(255,255,255,.20);
-      background: rgba(255,255,255,.07);
+      border-color: rgba(229,57,53,.55);
+      background: rgba(255,234,234,.95); /* brand red highlight */
+      box-shadow: 0 10px 30px rgba(229,57,53,.12);
+    }
+    .row{ position:relative; }
+    .row.active::before{
+      content:"";
+      position:absolute;
+      left:10px;
+      top:10px;
+      bottom:10px;
+      width:8px;
+      border-radius:999px;
+      background: rgba(229,57,53,1);
+    }
+    .row.active{ padding-left:26px; }
+    .row.active .t{ color: rgba(20,20,20,.96); }
+    .row.active .l{ color: rgba(30,30,30,.78) !important; }
+    .row.active div[style*='font-weight:900']{ color: rgba(10,10,10,.98); }
+    .row.active .tag{
+      border-color: rgba(229,57,53,.35);
+      background: rgba(229,57,53,.12);
+      color: rgba(120,0,0,.92);
     }
 
     footer{
@@ -630,6 +652,55 @@ html.theme-contrast #fsPrompt .box{ background: rgba(255,255,255,.94); color:#11
   background: rgba(0,0,0,.06); color:#111;
 }
 
+
+/* ===== v4.7.6 현재시각 표시/3단계 안내 ===== */
+#nowClock{ font-weight: 900; letter-spacing: .5px; font-variant-numeric: tabular-nums; }
+
+
+/* ===== v4.7.7: 관리자 비밀번호 모달(버튼 구분) + 현재시각 항상 표시 ===== */
+#adminPwModal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:9999; }
+#adminPwModal.show{ display:flex; }
+#adminPwModal .adminPwBackdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); backdrop-filter: blur(6px); }
+#adminPwModal .adminPwCard{
+  position:relative;
+  width:min(520px, 92vw);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  border: 1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.96);
+  color:#111;
+}
+html.theme-dark #adminPwModal .adminPwCard{ background: rgba(24,24,28,.94); color:#fff; border-color: rgba(255,255,255,.12); }
+#adminPwModal .adminPwTitle{ font-size:18px; font-weight:900; }
+#adminPwModal .adminPwDesc{ margin-top:6px; font-size:13px; opacity:.85; }
+#adminPwInput{
+  margin-top:12px;
+  width:100%;
+  height:46px;
+  padding:0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.18);
+  background: rgba(255,255,255,.9);
+  color:#111;
+  font-size:16px;
+}
+html.theme-dark #adminPwInput{ background: rgba(0,0,0,.25); border-color: rgba(255,255,255,.18); color:#fff; }
+.adminPwActions{ display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
+#adminPwModal .btnPrimary{
+  height:44px; padding:0 16px; border-radius:14px;
+  border:1px solid rgba(0,0,0,.08);
+  background: #c01818; color:#fff; font-weight:900;
+}
+#adminPwModal .btnSecondary{
+  height:44px; padding:0 16px; border-radius:14px;
+  border:1px solid rgba(0,0,0,.18);
+  background: rgba(0,0,0,.05); color:#111; font-weight:800;
+}
+html.theme-dark #adminPwModal .btnSecondary{
+  background: rgba(255,255,255,.10); color:#fff; border-color: rgba(255,255,255,.18);
+}
+
 </style>
 </head>
 
@@ -653,14 +724,16 @@ html.theme-contrast #fsPrompt .box{ background: rgba(255,255,255,.94); color:#11
         
         <button id="adminLockBtn" class="btn danger">🔒 관리자 잠금(ON)</button>
         <button id="btnFull">전체화면</button>
-<!-- admin-only controls begin -->
-        <div class="adminOnly">
+
         <div class="pill" title="PC 시간이 자동동기화 상태면 이 시간이 기준입니다.">
           <div class="k">현재시각</div>
           <div class="v" id="nowClock">--:--:--</div>
         </div>
 
-        <div class="pill">
+        
+<!-- admin-only controls begin -->
+        <div class="adminOnly">
+<div class="pill">
           <div class="k">소리</div>
           <div class="v" id="soundState">OFF</div>
         </div>
@@ -678,6 +751,16 @@ html.theme-contrast #fsPrompt .box{ background: rgba(255,255,255,.94); color:#11
             <label><input type="checkbox" id="warnClassEnd" checked> 수업 종료</label>
           </div>
         </div>
+
+        <div class="pill adminOnly">
+          <div class="k">3단계 안내</div>
+          <div class="v" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <label><input type="checkbox" id="stage5" checked> 5분 전</label>
+            <label><input type="checkbox" id="stage1" checked> 1분 전</label>
+            <label><input type="checkbox" id="stage0" checked> 종료 시</label>
+          </div>
+        </div>
+
 
 
 
@@ -804,6 +887,13 @@ html.theme-contrast #fsPrompt .box{ background: rgba(255,255,255,.94); color:#11
   </div>
 
 <script>
+// ===== Global KST helper (ABSOLUTE TOP) =====
+function getKSTDate(){
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  return new Date(utc + (9 * 60 * 60000));
+}
+
 /**
  * SPARTA SAM 송도센터 실시간 시간표 (단일 HTML)
  * - 실시간 시계 기반으로 현재 구간을 계산
@@ -1222,8 +1312,8 @@ function findCurrent(minNow){
   return null;
 }
 
-function tick(){
-  const now = new Date();
+function _tickCore(){
+  const now = getKSTDate();
   const offDay = updateBanner(now);
   $("nowClock").textContent = fmtClock(now);
 
@@ -1308,10 +1398,59 @@ function tick(){
 }
 
 function highlightRow(key){
-  document.querySelectorAll(".row").forEach(r=>{
-    r.classList.toggle("active", key && r.dataset.key === key);
+  const rows = Array.from(document.querySelectorAll(".row"));
+  let activeEl = null;
+  rows.forEach(r=>{
+    const isActive = !!key && r.dataset.key === key;
+    r.classList.toggle("active", isActive);
+
+    // Update tag text to be very obvious on TV
+    const tagEl = r.querySelector(".tag");
+    if(tagEl){
+      if(isActive){
+        tagEl.textContent = "● 진행중";
+      }else{
+        const item = schedule.find(it=>it.key===r.dataset.key);
+        tagEl.textContent = tagText(item ? item.type : "");
+      }
+    }
+    if(isActive) activeEl = r;
   });
+
+  // Auto-scroll the list so the active row is centered (only when it changes)
+  if(key && activeEl && key !== window.__lastActiveKey){
+    window.__lastActiveKey = key;
+    try{
+      activeEl.scrollIntoView({block:"center", inline:"nearest", behavior:"smooth"});
+    }catch(e){
+      // older TVs may not support behavior option
+      try{ activeEl.scrollIntoView(); }catch(_){}
+    }
+  }
 }
+
+
+function tick(){
+  try{
+    _tickCore();
+    const st = document.getElementById("statusText");
+    if(st && st.dataset.err==="1"){ st.dataset.err="0"; }
+  }catch(e){
+    console.error(e);
+    const st = document.getElementById("statusText");
+    const msg = (e && (e.message||String(e))) || "unknown error";
+    const stack = (e && e.stack) ? String(e.stack).split("\n").slice(0,2).join(" | ") : "";
+    if(st){
+      st.textContent = "운영시간 로딩 오류: " + msg + (stack ? " ("+stack+")" : "");
+      st.dataset.err="1";
+    }
+    const r = document.getElementById("remain");
+    if(r) r.textContent="--:--";
+    const title = document.getElementById("title");
+    if(title) title.textContent="—";
+  }
+}
+
 
 // ---------- buttons ----------
 $("btnSound").addEventListener("click", async ()=>{
@@ -1824,6 +1963,215 @@ setInterval(tick, 1000);
       toast("전체화면은 우측 '전체화면' 버튼으로 언제든 켤 수 있어요.");
     });
   }
+})();
+</script>
+
+
+<script>
+/* ===== v4.7.5 현재시간 강조 KST 보정 패치 ===== */
+(function(){
+  function getNowMinutesKST(){
+    const now = getKSTDate();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const kst = new Date(utc + (9 * 60 * 60000));
+    return kst.getHours() * 60 + kst.getMinutes();
+  }
+  function toMinutes(t){
+    if(!t) return -1;
+    const p = t.split(":").map(Number);
+    return p[0]*60 + p[1];
+  }
+
+  function highlightCurrentSlotKST(){
+    const nowMin = getNowMinutesKST();
+    document.querySelectorAll("[data-start][data-end]").forEach(row=>{
+      const s = toMinutes(row.dataset.start);
+      const e = toMinutes(row.dataset.end);
+      if(s <= nowMin && nowMin < e){
+        row.classList.add("active");
+      }else{
+        row.classList.remove("active");
+      }
+    });
+  }
+
+  window.addEventListener("load", ()=>{
+    highlightCurrentSlotKST();
+    setInterval(highlightCurrentSlotKST, 30000);
+  });
+})();
+</script>
+
+
+<script>
+/* ===== v4.7.6: 현재시각(KST) 표시 + 3단계(5분/1분/종료) 안내 ===== */
+(function(){
+  function getKSTDate(){
+    const now = getKSTDate();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    return new Date(utc + (9 * 60 * 60000));
+  }
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function formatHMS(d){ return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; }
+  function toMinutes(t){
+    if(!t) return -1;
+    const p = t.split(":").map(Number);
+    return p[0]*60 + p[1];
+  }
+  function nowSecondsKST(){
+    const d = getKSTDate();
+    return d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds();
+  }
+  function tickClock(){
+    const el = document.getElementById("nowClock");
+    if(el) el.textContent = formatHMS(getKSTDate());
+  }
+
+  function speakKo(text){
+    try{
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "ko-KR";
+      u.volume = 1.0;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function ringBell(type){
+    try{
+      const testBtn = document.getElementById("btnTest");
+      if(testBtn){ testBtn.click(); return; }
+    }catch(e){}
+    try{
+      if(typeof playBell === "function") return playBell(type);
+      if(typeof playBellSound === "function") return playBellSound(type);
+    }catch(e){}
+  }
+
+  const getTypeEnabled = (type)=>{
+    if(type==="break"){ const el=document.getElementById("warnBreakEnd"); return el ? el.checked : true; }
+    if(type==="meal"){  const el=document.getElementById("warnMealEnd");  return el ? el.checked : true; }
+    if(type==="class"){ const el=document.getElementById("warnClassEnd"); return el ? el.checked : true; }
+    return true;
+  };
+  const getStageEnabled = (stage)=>{
+    if(stage===5){ const el=document.getElementById("stage5"); return el ? el.checked : true; }
+    if(stage===1){ const el=document.getElementById("stage1"); return el ? el.checked : true; }
+    if(stage===0){ const el=document.getElementById("stage0"); return el ? el.checked : true; }
+    return true;
+  };
+
+  function msgFor(type, stage){
+    const next = "다음 교시";
+    if(type==="break"){
+      if(stage===5) return `휴식 종료 5분 전입니다. ${next} 준비해 주세요.`;
+      if(stage===1) return `휴식 종료 1분 전입니다. ${next}가 곧 시작됩니다.`;
+      return `휴식이 종료되었습니다. ${next}를 시작합니다.`;
+    }
+    if(type==="meal"){
+      if(stage===5) return `식사 시간 종료 5분 전입니다. ${next} 준비해 주세요.`;
+      if(stage===1) return `식사 시간 종료 1분 전입니다. ${next}가 곧 시작됩니다.`;
+      return `식사 시간이 종료되었습니다. ${next}를 시작합니다.`;
+    }
+    if(stage===5) return `수업 종료 5분 전입니다. 마무리해 주세요.`;
+    if(stage===1) return `수업 종료 1분 전입니다. 잠시 후 ${next}로 전환됩니다.`;
+    return `수업이 종료되었습니다. ${next}로 전환합니다.`;
+  }
+
+  function todayKey(){
+    const d=getKSTDate();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  const fired = new Set();
+
+  function check3Stage(){
+    try{
+      if(typeof schedule === "undefined" || !Array.isArray(schedule)) return;
+      const nSec = nowSecondsKST();
+
+      for(const seg of schedule){
+        if(!seg || !seg.key || !seg.start || !seg.end) continue;
+        const type = (seg.type||"").toLowerCase();
+        if(!getTypeEnabled(type)) continue;
+
+        const endMin = toMinutes(seg.end);
+        if(endMin < 0) continue;
+        const endSec = endMin * 60;
+
+        for(const st of [5,1,0]){
+          if(!getStageEnabled(st)) continue;
+          const trigSec = endSec - (st*60);
+          if(nSec === trigSec){
+            const k = `${todayKey()}|${seg.key}|${st}`;
+            if(fired.has(k)) continue;
+            fired.add(k);
+            ringBell(type);
+            speakKo(msgFor(type, st));
+          }
+        }
+      }
+    }catch(e){}
+  }
+
+  window.addEventListener("load", ()=>{
+    tickClock();
+    setInterval(tickClock, 1000);
+    setInterval(check3Stage, 1000);
+  });
+})();
+</script>
+
+
+<div id="adminPwModal" aria-hidden="true">
+  <div class="adminPwBackdrop"></div>
+  <div class="adminPwCard" role="dialog" aria-modal="true" aria-labelledby="adminPwTitle">
+    <div class="adminPwTitle" id="adminPwTitle">관리자 잠금 해제</div>
+    <div class="adminPwDesc">비밀번호를 입력해 주세요.</div>
+    <input id="adminPwInput" type="password" inputmode="text" autocomplete="off" placeholder="비밀번호" />
+    <div class="adminPwActions">
+      <button id="adminPwCancel" class="btnSecondary">취소</button>
+      <button id="adminPwOk" class="btnPrimary">확인</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ===== v4.7.7: 관리자 비밀번호 모달 로직 ===== */
+(function(){
+  const modal = document.getElementById("adminPwModal");
+  if(!modal) return;
+
+  const input = document.getElementById("adminPwInput");
+  const okBtn = document.getElementById("adminPwOk");
+  const cancelBtn = document.getElementById("adminPwCancel");
+  const backdrop = modal.querySelector(".adminPwBackdrop");
+
+  let resolver = null;
+
+  window.openAdminPwModal = function(){
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden","false");
+    if(input){ input.value=""; setTimeout(()=>input.focus(), 30); }
+    return new Promise((resolve)=>{ resolver = resolve; });
+  };
+
+  function close(val){
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden","true");
+    if(resolver){ const r=resolver; resolver=null; r(val); }
+  }
+
+  okBtn && okBtn.addEventListener("click", ()=> close(input ? input.value : ""));
+  cancelBtn && cancelBtn.addEventListener("click", ()=> close(null));
+  backdrop && backdrop.addEventListener("click", ()=> close(null));
+
+  window.addEventListener("keydown", (e)=>{
+    if(!modal.classList.contains("show")) return;
+    if(e.key === "Escape"){ e.preventDefault(); close(null); }
+    if(e.key === "Enter"){ e.preventDefault(); close(input ? input.value : ""); }
+  });
 })();
 </script>
 
