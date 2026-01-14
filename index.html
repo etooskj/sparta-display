@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>쭌에듀학원 | 실시간 시간표</title>
+  <title>SPARTA SAM 송도센터 | 실시간 시간표</title>
   <style>
     :root{
       --bg:#0b0d12;
@@ -701,6 +701,14 @@ html.theme-dark #adminPwModal .btnSecondary{
   background: rgba(255,255,255,.10); color:#fff; border-color: rgba(255,255,255,.18);
 }
 
+
+/* ===== v4: TV 전체화면 잘림/스크롤 고정 패치 ===== */
+.main{ min-height:0 !important; height:100vh; }
+.left, .right{ min-height:0 !important; }
+.right{ display:flex; flex-direction:column; }
+.todayBox{ display:flex; flex-direction:column; min-height:0 !important; }
+.todayList{ flex:1 1 auto; min-height:0 !important; overflow:auto; -webkit-overflow-scrolling:touch; }
+
 </style>
 </head>
 
@@ -710,7 +718,7 @@ html.theme-dark #adminPwModal .btnSecondary{
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1>쭌에듀 10 TO 10</h1>
+          <h1>SPARTA SAM SONGDO CENTER</h1>
           <div class="sub">재학생 / N수생 대상 · 실시간 시간표</div>
 
         <div class="banner" id="banner">
@@ -895,7 +903,7 @@ function getKSTDate(){
 }
 
 /**
- * 쭌에듀학원 실시간 시간표 (단일 HTML)
+ * SPARTA SAM 송도센터 실시간 시간표 (단일 HTML)
  * - 실시간 시계 기반으로 현재 구간을 계산
  * - 구간이 바뀌면 종소리(웹오디오) 재생 (사용자 클릭으로 활성화 필요)
  * - 전체화면 버튼 제공
@@ -2100,6 +2108,50 @@ setInterval(tick, 1000);
       else requestFullscreenSafe();
     }, {passive:false});
   });
+})();
+</script>
+
+
+<script>
+/* ===== v4: 오늘 시간표 '현재 구간' 자동 센터링(전체화면/TV 대응) ===== */
+(function(){
+  function centerActiveInToday(){
+    const list = document.querySelector(".todayList");
+    if(!list) return;
+
+    // 다양한 마크업 대비: row/timeRow 클래스 우선
+    const activeRow = list.querySelector(".row.active") || list.querySelector(".timeRow.active") || list.querySelector(".active");
+    if(!activeRow) return;
+
+    const row = activeRow.closest(".row, .timeRow") || activeRow;
+
+    const target = row.offsetTop - (list.clientHeight/2) + (row.clientHeight/2);
+    const maxScroll = Math.max(0, list.scrollHeight - list.clientHeight);
+    const next = Math.max(0, Math.min(target, maxScroll));
+    list.scrollTop = next;
+  }
+
+  function centerActiveSoon(){
+    requestAnimationFrame(()=>{ centerActiveInToday(); });
+    setTimeout(centerActiveInToday, 120);
+    setTimeout(centerActiveInToday, 400);
+    setTimeout(centerActiveInToday, 900);
+  }
+
+  window.addEventListener("load", centerActiveSoon);
+  window.addEventListener("resize", centerActiveSoon);
+  document.addEventListener("fullscreenchange", centerActiveSoon);
+  document.addEventListener("webkitfullscreenchange", centerActiveSoon);
+
+  // tick 후마다 센터링
+  const origTick = window.tick;
+  if(typeof origTick === "function"){
+    window.tick = function(){
+      const r = origTick.apply(this, arguments);
+      centerActiveSoon();
+      return r;
+    };
+  }
 })();
 </script>
 
