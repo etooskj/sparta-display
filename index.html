@@ -1,3 +1,4 @@
+<!-- BUILD: 2026-01-13T06:34:39.598887 -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -312,8 +313,29 @@
       white-space:nowrap;
     }
     .row.active{
-      border-color: rgba(255,255,255,.20);
-      background: rgba(255,255,255,.07);
+      border-color: rgba(229,57,53,.55);
+      background: rgba(255,234,234,.95); /* brand red highlight */
+      box-shadow: 0 10px 30px rgba(229,57,53,.12);
+    }
+    .row{ position:relative; }
+    .row.active::before{
+      content:"";
+      position:absolute;
+      left:10px;
+      top:10px;
+      bottom:10px;
+      width:8px;
+      border-radius:999px;
+      background: rgba(229,57,53,1);
+    }
+    .row.active{ padding-left:26px; }
+    .row.active .t{ color: rgba(20,20,20,.96); }
+    .row.active .l{ color: rgba(30,30,30,.78) !important; }
+    .row.active div[style*='font-weight:900']{ color: rgba(10,10,10,.98); }
+    .row.active .tag{
+      border-color: rgba(229,57,53,.35);
+      background: rgba(229,57,53,.12);
+      color: rgba(120,0,0,.92);
     }
 
     footer{
@@ -476,185 +498,225 @@
     }
 
 
-    
-    /* =========================
-       Responsive (기기별 자동 대응) v5.1
-       - header 태그 기반(구조 안 건드림)
-       ========================= */
-    :root{
-      --fs-hero: clamp(44px, 4.6vw, 92px);
-      --fs-sub:  clamp(18px, 1.6vw, 28px);
-      --fs-pill: clamp(16px, 1.25vw, 22px);
-      --fs-note: clamp(16px, 1.35vw, 22px);
-      --pad-card: clamp(18px, 2.2vw, 34px);
-      --gap-main: clamp(12px, 1.6vw, 22px);
-      --radius:   clamp(18px, 2.0vw, 30px);
+    .btn.danger{
+      background: rgba(209,31,46,.18);
+      border: 1px solid rgba(209,31,46,.45);
     }
-
-    .wrap{ max-width: 1920px; margin: 0 auto; }
-
-    .heroTitle{ font-size: var(--fs-hero) !important; }
-    .subtitle{  font-size: var(--fs-sub) !important; }
-    .pill{      font-size: var(--fs-pill) !important; }
-    .note, .noticeBody{ font-size: var(--fs-note) !important; }
-    .hero, .tableCard, .bottomNotice{ border-radius: var(--radius) !important; }
-    .hero{ padding: var(--pad-card) !important; }
-    .tableCard{ padding: var(--pad-card) !important; }
-
-    /* 헤더(상단) 반응형: 자동 줄바꿈 */
-    header{
-      display:flex;
-      flex-wrap:wrap;
-      gap: 12px;
-      align-items:center;
-      justify-content:space-between;
+    .btn.danger.on{
+      background: rgba(209,31,46,.35);
+      border-color: rgba(209,31,46,.7);
     }
-    .topRight{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      justify-content:flex-end;
-      align-items:center;
-    }
-    .topRight button{
+    #toast{
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.75);
+      color: #fff;
       padding: 10px 14px;
-      font-size: clamp(14px, 1.2vw, 16px);
+      border-radius: 12px;
+      font-size: 16px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
     }
-    .topRight select{
-      font-size: clamp(14px, 1.2vw, 16px) !important;
-    }
-    .topRight input[type="range"]{
-      width: min(220px, 42vw);
-    }
-
-    /* 메인 레이아웃: 넓으면 2열, 좁으면 1열 */
-    main{
-      gap: var(--gap-main) !important;
-    }
-    @media (max-width: 1024px){
-      main{
-        grid-template-columns: 1fr !important;
-      }
-      .side{
-        display:grid;
-        grid-template-columns: 1fr;
-        gap: var(--gap-main);
-      }
-      .bottomNotice{ margin-top: var(--gap-main); }
-    }
-
-    @media (max-width: 520px){
-      body{ padding: 12px; }
-      .wrap{ gap: 12px; }
-      .noticeInner{ padding: 18px 18px !important; }
-      .noticeTitle{ font-size: clamp(20px, 4.6vw, 26px) !important; }
-      .bottomNotice{ border-radius: 18px !important; }
-    }
-
-
-    /* =========================
-       Layout fix for 작은 높이(세로 화면/전체화면)
-       - 상단 컨트롤 영역이 본문을 밀어내지 않게 컴팩트화
-       ========================= */
-    @media (max-height: 920px){
-      body{ padding: 16px; }
-      .wrap{ gap: 14px !important; }
-      .header{ padding: 12px 14px !important; }
-      .topRight{ gap: 8px !important; }
-      .pill{
-        padding: 10px 12px !important;
-        border-radius: 18px !important;
-      }
-      .topRight button{
-        padding: 10px 12px !important;
-        border-radius: 18px !important;
-      }
-      .topRight input[type="range"]{ width: min(180px, 38vw) !important; }
-      .topRight .pill .k{ opacity:.85; }
-      /* 컨트롤들을 2줄 그리드로 정렬(너무 길게 가로로 늘어나는 것 방지) */
-      .topRight{
-        display:grid !important;
-        grid-template-columns: 1fr 1fr 1fr;
-        align-items:center;
-        justify-items:end;
-      }
-      /* 긴 요소(슬라이더/드롭다운)는 2~3칸 사용 */
-      #voiceVol, #vol{ width: 100% !important; }
-      #bellSelect{ width: 100% !important; }
-      .topRight .pill:nth-of-type(1){ grid-column: 1 / 3; justify-self:end; } /* 현재시각 */
-      .topRight .pill:nth-of-type(2){ grid-column: 3 / 4; } /* 소리 ON */
-      .topRight .pill:nth-of-type(3){ grid-column: 3 / 4; } /* 안내 ON */
-      /* 음성볼륨/종소리/볼륨은 한 줄씩 */
-      .topRight .pill:has(#voiceVol){ grid-column: 1 / 3; }
-      .topRight .pill:has(#bellSelect){ grid-column: 3 / 4; }
-      .topRight .pill:has(#vol){ grid-column: 1 / 3; }
-      /* 버튼들은 다음 줄로 */
-      .topRight button{ width: 100%; }
-      .topRight button:nth-last-child(1){ grid-column: 3 / 4; } /* 전체화면 */
-      .topRight button:nth-last-child(2){ grid-column: 2 / 4; } /* 주말/공휴일 */
-      .topRight button:nth-last-child(3){ grid-column: 1 / 2; } /* 안내 음성 끄기 */
-      .topRight button:nth-last-child(4){ grid-column: 2 / 3; } /* 종소리 테스트 */
-      .topRight button:nth-last-child(5){ grid-column: 3 / 4; } /* 소리 끄기 */
-
-      /* 메인 카드가 더 위로 올라오게 패딩/크기 살짝 축소 */
-      .hero{ padding: 22px !important; }
-      .tableCard{ padding: 22px !important; }
-    }
-
-    /* 아주 작은 세로 화면(모바일 세로 등) */
-    @media (max-width: 520px), (max-height: 780px){
-      .topRight{
-        grid-template-columns: 1fr 1fr !important;
-        justify-items:stretch !important;
-      }
-      .topRight .pill, .topRight button{ width: 100% !important; }
-      .topRight .pill:has(#bellSelect){ grid-column: 1 / 3 !important; }
-      .topRight .pill:has(#voiceVol){ grid-column: 1 / 3 !important; }
-      .topRight .pill:has(#vol){ grid-column: 1 / 3 !important; }
-    }
-
-
-    /* =========================
-       Auto-Fit (어떤 화면에서도 "안 잘리게" 전체 맞춤)
-       - 내용 전체를 화면에 맞게 자동 스케일
-       ========================= */
-    #stage{
-      width:100vw;
-      height:100vh;
-      display:flex;
-      align-items:flex-start;
-      justify-content:center;
-      padding: 0 18px;
-      overflow:hidden; /* 잘림 방지: 대신 스케일로 맞춤 */
-    }
-    #appWrap{
-      transform-origin: top center;
-      will-change: transform;
-    }
-
-    /* Baseline design width: 1920 (TV/모니터 기준). 작은 화면에서는 Auto-Fit이 축소 */
-    #appWrap{
-      width: 1920px;
-      max-width: 1920px;
-    }
-    /* 한글이 글자 단위로 세로로 찢어지는 현상 방지 */
+    #toast.show{ opacity: 1; }
     .noticeBody, .noticeTitle, footer, .pill, button, select{
       word-break: keep-all;
       overflow-wrap: normal;
     }
-    .bottomNotice, footer{
-      width: 100%;
-    }
 
-    body{
-      overflow:hidden;
-    }
 
+/* ===== 테마 시스템 (다크/라이트/고대비) ===== */
+:root{
+  --bg:#0f1115;
+  --panel:#171a21;
+  --panel2:#1c2029;
+  --text:#ffffff;
+  --muted:#b8bcc8;
+  --border: rgba(255,255,255,.10);
+  --accent:#e53935;
+  --btnBg: rgba(255,255,255,.06);
+  --btnBorder: rgba(255,255,255,.14);
+}
+:root.theme-light{
+  --bg:#f5f6f8;
+  --panel:#ffffff;
+  --panel2:#ffffff;
+  --text:#111111;
+  --muted:#444444;
+  --border: rgba(0,0,0,.12);
+  --accent:#c62828;
+  --btnBg: rgba(0,0,0,.04);
+  --btnBorder: rgba(0,0,0,.14);
+}
+:root.theme-contrast{
+  --bg:#ffffff;
+  --panel:#ffffff;
+  --panel2:#ffffff;
+  --text:#000000;
+  --muted:#000000;
+  --border: #000000;
+  --accent:#000000;
+  --btnBg:#ffffff;
+  --btnBorder:#000000;
+}
+
+/* 광범위하게 적용 (기존 스타일 위에 덮어쓰기) */
+body{ background:var(--bg) !important; color:var(--text) !important; }
+header{ background:var(--panel) !important; color:var(--text) !important; border-color:var(--border) !important; }
+.pill{ background:var(--panel2) !important; color:var(--text) !important; border-color:var(--border) !important; }
+.panel{ background:var(--panel) !important; color:var(--text) !important; border-color:var(--border) !important; }
+.btn{ background:var(--btnBg) !important; border-color:var(--btnBorder) !important; color:var(--text) !important; }
+select, input[type="range"]{ accent-color: var(--accent); }
+
+
+    .miniOpt{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--btnBg);
+      user-select:none;
+      font-size:14px;
+      line-height:1;
+      height:40px;
+    }
+    .miniOpt input{ width:16px; height:16px; }
+
+
+/* ===== v4.7.1 테마 가독성 패치 (라이트/고대비 버튼 글씨 문제 해결) =====
+   v4 원본은 --fg / --muted / --muted2 등 변수로 글씨색을 정합니다.
+   라이트/고대비에서 이 변수를 같이 바꿔줘야 버튼/필드 글씨가 선명해집니다.
+*/
+:root{
+  --fg: var(--text);
+}
+:root.theme-light{
+  --fg: #111111;
+  --muted: rgba(0,0,0,.72);
+  --muted2: rgba(0,0,0,.62);
+  --border: rgba(0,0,0,.14);
+}
+:root.theme-contrast{
+  --fg: #000000;
+  --muted: #000000;
+  --muted2: #000000;
+  --border: #000000;
+}
+/* 버튼/체크박스/셀렉트 텍스트를 강제 선명하게 */
+button, .btn, select, option, label{ color: var(--fg) !important; }
+
+
+/* ===== v4.7.2 일반모드에서는 설정 UI 숨김 (관리자모드에서만 표시) ===== */
+html:not(.admin-on) .adminOnly{ display:none !important; }
+/* 관리자 버튼은 일반모드에서도 보이게(작게) */
+html:not(.admin-on) #adminLockBtn{ opacity:.78; }
+
+
+/* ===== v4.7.4 전광판 운용 옵션: 자동 전체화면 유도 + 새로고침 방지 ===== */
+#fsPrompt{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.35);
+  z-index: 9998;
+}
+#fsPrompt .box{
+  background: rgba(255,255,255,.92);
+  color: #111;
+  border-radius: 18px;
+  padding: 18px 20px;
+  min-width: 280px;
+  max-width: min(520px, 92vw);
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0,0,0,.25);
+  border: 1px solid rgba(0,0,0,.08);
+}
+html.theme-light #fsPrompt .box,
+html.theme-contrast #fsPrompt .box{ background: rgba(255,255,255,.94); color:#111; }
+#fsPrompt .title{ font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+#fsPrompt .desc{ font-size: 14px; opacity:.9; margin-bottom: 14px; line-height: 1.35; }
+#fsPrompt .actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+#fsPrompt .actions button{
+  height: 42px; padding: 0 14px; border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.15);
+  background: #111; color:#fff; font-weight: 700;
+}
+#fsPrompt .actions button.secondary{
+  background: rgba(0,0,0,.06); color:#111;
+}
+
+
+/* ===== v4.7.6 현재시각 표시/3단계 안내 ===== */
+#nowClock{ font-weight: 900; letter-spacing: .5px; font-variant-numeric: tabular-nums; }
+
+
+/* ===== v4.7.7: 관리자 비밀번호 모달(버튼 구분) + 현재시각 항상 표시 ===== */
+#adminPwModal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:9999; }
+#adminPwModal.show{ display:flex; }
+#adminPwModal .adminPwBackdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); backdrop-filter: blur(6px); }
+#adminPwModal .adminPwCard{
+  position:relative;
+  width:min(520px, 92vw);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  border: 1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.96);
+  color:#111;
+}
+html.theme-dark #adminPwModal .adminPwCard{ background: rgba(24,24,28,.94); color:#fff; border-color: rgba(255,255,255,.12); }
+#adminPwModal .adminPwTitle{ font-size:18px; font-weight:900; }
+#adminPwModal .adminPwDesc{ margin-top:6px; font-size:13px; opacity:.85; }
+#adminPwInput{
+  margin-top:12px;
+  width:100%;
+  height:46px;
+  padding:0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.18);
+  background: rgba(255,255,255,.9);
+  color:#111;
+  font-size:16px;
+}
+html.theme-dark #adminPwInput{ background: rgba(0,0,0,.25); border-color: rgba(255,255,255,.18); color:#fff; }
+.adminPwActions{ display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
+#adminPwModal .btnPrimary{
+  height:44px; padding:0 16px; border-radius:14px;
+  border:1px solid rgba(0,0,0,.08);
+  background: #c01818; color:#fff; font-weight:900;
+}
+#adminPwModal .btnSecondary{
+  height:44px; padding:0 16px; border-radius:14px;
+  border:1px solid rgba(0,0,0,.18);
+  background: rgba(0,0,0,.05); color:#111; font-weight:800;
+}
+html.theme-dark #adminPwModal .btnSecondary{
+  background: rgba(255,255,255,.10); color:#fff; border-color: rgba(255,255,255,.18);
+}
+
+
+/* ===== v4: TV 전체화면 잘림/스크롤 고정 패치 ===== */
+.main{ min-height:0 !important; height:100vh; }
+.left, .right{ min-height:0 !important; }
+.right{ display:flex; flex-direction:column; }
+.todayBox{ display:flex; flex-direction:column; min-height:0 !important; }
+.todayList{ flex:1 1 auto; min-height:0 !important; overflow:auto; -webkit-overflow-scrolling:touch; }
+
+
+/* audio warnings disabled */
+.audioWarning, .voiceWarning, .ttsWarning, #audioWarning, #voiceWarning, #ttsWarning{display:none!important;}
 </style>
 </head>
 
 <body class="mode-off">
-  <div id="stage"><div class="wrap" id="appWrap">
+  <div class="wrap">
     <header>
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
@@ -670,12 +732,19 @@
       </div>
 
       <div class="topRight">
+        
+        <button id="adminLockBtn" class="btn danger">🔒 관리자 잠금(ON)</button>
+        <button id="btnFull">전체화면</button>
+
         <div class="pill" title="PC 시간이 자동동기화 상태면 이 시간이 기준입니다.">
           <div class="k">현재시각</div>
           <div class="v" id="nowClock">--:--:--</div>
         </div>
 
-        <div class="pill">
+        
+<!-- admin-only controls begin -->
+        <div class="adminOnly">
+<div class="pill">
           <div class="k">소리</div>
           <div class="v" id="soundState">OFF</div>
         </div>
@@ -684,6 +753,26 @@
           <div class="k">안내</div>
           <div class="v" id="voiceState">OFF</div>
         </div>
+
+        <div class="pill">
+          <div class="k">1분전 예고</div>
+          <div class="v" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <label><input type="checkbox" id="warnBreakEnd" checked> 휴식 종료</label>
+            <label><input type="checkbox" id="warnMealEnd" checked> 식사 종료</label>
+            <label><input type="checkbox" id="warnClassEnd" checked> 수업 종료</label>
+          </div>
+        </div>
+
+        <div class="pill adminOnly">
+          <div class="k">3단계 안내</div>
+          <div class="v" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <label><input type="checkbox" id="stage5" checked> 5분 전</label>
+            <label><input type="checkbox" id="stage1" checked> 1분 전</label>
+            <label><input type="checkbox" id="stage0" checked> 종료 시</label>
+          </div>
+        </div>
+
+
 
 
         <div class="pill">
@@ -723,8 +812,15 @@
         <button id="btnSound">소리 켜기</button>
         <button id="btnTest">종소리 테스트</button>
         <button id="btnVoice">안내 음성 켜기</button>
+        
+        <button id="voiceTestBtn" class="btn">안내 음성 테스트</button>
         <button id="btnDayMode">주말/공휴일 자동</button>
-        <button id="btnFull">전체화면</button>
+        
+
+        <button id="themeBtn" class="btn">🌗 테마: 다크</button>
+        <label class="miniOpt"><input type="checkbox" id="themeAuto"> 자동</label>
+        <label class="miniOpt"><input type="checkbox" id="themeLock"> 테마 잠금</label>
+
       </div>
     </header>
 
@@ -802,7 +898,12 @@
   </div>
 
 <script>
-  const SUPPRESS_AUDIO_WARNINGS = true; // suppress audio warnings on TV browsers
+// ===== Global KST helper (ABSOLUTE TOP) =====
+function getKSTDate(){
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  return new Date(utc + (9 * 60 * 60000));
+}
 
 /**
  * SPARTA SAM 송도센터 실시간 시간표 (단일 HTML)
@@ -1222,8 +1323,8 @@ function findCurrent(minNow){
   return null;
 }
 
-function tick(){
-  const now = new Date();
+function _tickCore(){
+  const now = getKSTDate();
   const offDay = updateBanner(now);
   $("nowClock").textContent = fmtClock(now);
 
@@ -1308,10 +1409,59 @@ function tick(){
 }
 
 function highlightRow(key){
-  document.querySelectorAll(".row").forEach(r=>{
-    r.classList.toggle("active", key && r.dataset.key === key);
+  const rows = Array.from(document.querySelectorAll(".row"));
+  let activeEl = null;
+  rows.forEach(r=>{
+    const isActive = !!key && r.dataset.key === key;
+    r.classList.toggle("active", isActive);
+
+    // Update tag text to be very obvious on TV
+    const tagEl = r.querySelector(".tag");
+    if(tagEl){
+      if(isActive){
+        tagEl.textContent = "● 진행중";
+      }else{
+        const item = schedule.find(it=>it.key===r.dataset.key);
+        tagEl.textContent = tagText(item ? item.type : "");
+      }
+    }
+    if(isActive) activeEl = r;
   });
+
+  // Auto-scroll the list so the active row is centered (only when it changes)
+  if(key && activeEl && key !== window.__lastActiveKey){
+    window.__lastActiveKey = key;
+    try{
+      activeEl.scrollIntoView({block:"center", inline:"nearest", behavior:"smooth"});
+    }catch(e){
+      // older TVs may not support behavior option
+      try{ activeEl.scrollIntoView(); }catch(_){}
+    }
+  }
 }
+
+
+function tick(){
+  try{
+    _tickCore();
+    const st = document.getElementById("statusText");
+    if(st && st.dataset.err==="1"){ st.dataset.err="0"; }
+  }catch(e){
+    console.error(e);
+    const st = document.getElementById("statusText");
+    const msg = (e && (e.message||String(e))) || "unknown error";
+    const stack = (e && e.stack) ? String(e.stack).split("\n").slice(0,2).join(" | ") : "";
+    if(st){
+      st.textContent = "운영시간 로딩 오류: " + msg + (stack ? " ("+stack+")" : "");
+      st.dataset.err="1";
+    }
+    const r = document.getElementById("remain");
+    if(r) r.textContent="--:--";
+    const title = document.getElementById("title");
+    if(title) title.textContent="—";
+  }
+}
+
 
 // ---------- buttons ----------
 $("btnSound").addEventListener("click", async ()=>{
@@ -1326,14 +1476,14 @@ $('volText').textContent = `${$('vol').value}%`;
     $("btnSound").textContent = soundEnabled ? "소리 끄기" : "소리 켜기";
     if(soundEnabled){ playBell("class"); speak("종소리가 켜졌습니다."); }
   }catch(e){
-    /* audio alert removed */
+    alert("소리를 켤 수 없습니다. 브라우저 설정/권한을 확인해주세요.");
   }
 });
 
 $("btnTest").addEventListener("click", ()=>{
   ensureAudio();
   if(!soundEnabled){
-    /* audio alert removed */
+    alert("먼저 '소리 켜기'를 눌러주세요.");
     return;
   }
   playBell("class");
@@ -1407,50 +1557,606 @@ $("vol").addEventListener("input", ()=>{
 });
 
 
-
-/* =========================
-   Auto-Fit Scale
-   ========================= */
-let autoFitEnabled = true;
-function applyAutoFit(){
-  if(!autoFitEnabled) return;
-  const wrap = document.getElementById("appWrap");
-  const stage = document.getElementById("stage");
-  if(!wrap || !stage) return;
-
-  // reset scale to measure natural size
-  wrap.style.transform = "scale(1)";
-  // Use scrollWidth/scrollHeight to include all content
-  const w = wrap.offsetWidth;
-  const h = wrap.offsetHeight;
-
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-
-  // 작은 여백(2%) 남기고 맞추기
-  const s = Math.min(vw / w, vh / h) * 0.98;
-
-  // 너무 작아지지 않게 하되(가독성), 그래도 "안 잘리게"가 우선
-  const scale = Math.max(0.45, Math.min(1.15, s));
-
-  wrap.style.transform = `scale(${scale})`;
-  // 가운데 정렬 느낌을 위해 상단 여백 약간 보정(높이 남을 때)
-  const usedH = h * scale;
-  const topPad = Math.max(0, Math.floor((vh - usedH) * 0.04));
-  stage.style.paddingTop = topPad + "px";
-}
-
-window.addEventListener("resize", ()=> requestAnimationFrame(applyAutoFit));
-document.addEventListener("fullscreenchange", ()=> setTimeout(applyAutoFit, 50));
-
-
 // init
 renderRows();
-applyAutoFit();
 probeBellMp3('bell.mp3');
 $('volText').textContent = `${$('vol').value}%`;
 tick();
 setInterval(tick, 1000);
 </script>
+<div id="toast"></div>
+<script>
+
+/* ===============================
+   v4.6 운영기능 패치 (v4 스크립트 보존)
+   =============================== */
+(function(){
+  const ADMIN_PASSWORD = "sam1101!";
+  let adminLocked = true;
+
+  let warnBreakEnd = true;
+  let warnMealEnd  = true;
+  let warnClassEnd = true;
+
+  const toastEl = document.getElementById("toast");
+  let toastTimer = null;
+  function toast(msg){
+    if(!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toastEl.classList.remove("show"), 1300);
+  }
+
+  function setLockUI(){
+    const root = document.documentElement;
+    if(root) root.classList.toggle('admin-on', !adminLocked);
+
+    const btn = document.getElementById("adminLockBtn");
+    if(btn){
+      btn.classList.toggle("on", adminLocked);
+      btn.textContent = adminLocked ? "🔒 관리자 잠금(ON)" : "🔓 관리자 잠금(OFF)";
+    }
+  }
+
+  function intercept(e){
+    if(!adminLocked) return;
+    const t = e.target;
+    if(!t) return;
+    const id = t.id || "";
+    if(id === "adminLockBtn" || id === "btnFull" || id==="themeBtn" || id==="themeAuto" || id==="themeLock") return;
+
+    const top = document.querySelector(".topRight");
+    if(top && top.contains(t) && (t.closest("button,input,select") || ["BUTTON","INPUT","SELECT"].includes(t.tagName))){
+      e.preventDefault();
+      e.stopPropagation();
+      toast("관리자 잠금 상태입니다. 잠금 해제 후 조작하세요.");
+    }
+  }
+
+  function bindLock(){
+    const btn = document.getElementById("adminLockBtn");
+    if(btn){
+      btn.addEventListener("click", ()=>{
+        if(adminLocked){
+          const pw = prompt("관리자 비밀번호를 입력하세요:");
+          if(pw === null) return;
+          if(pw !== ADMIN_PASSWORD){
+            alert("비밀번호가 올바르지 않습니다.");
+            return;
+          }
+          adminLocked = false;
+          toast("잠금 해제됨");
+        }else{
+          adminLocked = true;
+          toast("잠금 설정됨");
+        }
+        setLockUI();
+      });
+    }
+    document.addEventListener("click", intercept, true);
+    document.addEventListener("change", intercept, true);
+    setLockUI();
+  }
+
+  function speakKo(text){
+    try{
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "ko-KR";
+      u.volume = 1.0;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+      window.speechSynthesis.speak(u);
+    }catch(e){
+      console.warn(e);
+      alert("");
+    }
+  }
+
+  function bindVoiceTest(){
+    const vtb = document.getElementById("voiceTestBtn");
+    if(vtb){
+      vtb.addEventListener("click", ()=>{
+        if(adminLocked){
+          toast("잠금 해제 후 테스트할 수 있어요.");
+          return;
+        }
+        speakKo("안내 음성 테스트입니다. 현재 음성 볼륨과 발음을 확인해 주세요.");
+      });
+    }
+  }
+
+  function bindVoiceVol(){
+    const el = document.getElementById("voiceVol");
+    const tx = document.getElementById("voiceVolText");
+    if(!el) return;
+    const sync=()=>{ if(tx) tx.textContent = `${el.value}%`; };
+    sync();
+    el.addEventListener("input", sync);
+  }
+
+  function bindWarnToggles(){
+    const wbe = document.getElementById("warnBreakEnd");
+    const wme = document.getElementById("warnMealEnd");
+    const wce = document.getElementById("warnClassEnd");
+    if(wbe) wbe.addEventListener("change", ()=> warnBreakEnd = wbe.checked);
+    if(wme) wme.addEventListener("change", ()=> warnMealEnd  = wme.checked);
+    if(wce) wce.addEventListener("change", ()=> warnClassEnd = wce.checked);
+  }
+
+  function toSec(hhmm){
+    const [h,m]=hhmm.split(":").map(n=>parseInt(n,10));
+    return h*3600+m*60;
+  }
+  function nowSec(){
+    const d=new Date();
+    return d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds();
+  }
+  function todayKey(){
+    const d=new Date();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  let lastWarnKey = "";
+  function checkWarn(){
+    try{
+      if(typeof schedule === "undefined" || !Array.isArray(schedule)) return;
+      const n = nowSec();
+      for(const seg of schedule){
+        if(!seg || !seg.key || !seg.start || !seg.end) continue;
+        const end = toSec(seg.end);
+        const trig = end - 60;
+        if(n === trig){
+          const typ = (seg.type||"").toLowerCase();
+          const ok =
+            (typ==="break" && warnBreakEnd) ||
+            (typ==="meal"  && warnMealEnd)  ||
+            (typ==="class" && warnClassEnd);
+          const k = `${todayKey()}|${seg.key}`;
+          if(ok && lastWarnKey !== k){
+            lastWarnKey = k;
+
+            // 기존 종소리 테스트와 같은 루트로 실행되도록 'btnTest' 클릭을 트리거
+            try{
+              const testBtn = document.getElementById("btnTest");
+              if(testBtn){
+                testBtn.click();
+              }else if(typeof playBell === "function"){
+                playBell(typ);
+              }
+            }catch(e){}
+
+            let msg = "";
+            if(typ==="break") msg = "휴식 종료 1분 전입니다. 잠시 후 다음 교시가 시작됩니다.";
+            else if(typ==="meal") msg = "식사 시간 종료 1분 전입니다. 잠시 후 다음 교시가 시작됩니다.";
+            else msg = "수업 종료 1분 전입니다. 잠시 후 다음 교시로 전환됩니다.";
+            speakKo(msg);
+          }
+        }
+      }
+    }catch(e){}
+  }
+
+  function start(){
+    bindLock();
+    bindVoiceTest();
+    bindVoiceVol();
+    bindWarnToggles();
+    setInterval(checkWarn, 1000);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", start);
+  }else{
+    start();
+  }
+})();
+
+</script>
+
+<script>
+/* ===== 테마 컨트롤 (사용자 선택/자동/잠금) ===== */
+(function(){
+  const root = document.documentElement;
+  const btn  = document.getElementById("themeBtn");
+  const auto = document.getElementById("themeAuto");
+  const lock = document.getElementById("themeLock");
+
+  const THEMES = ["dark","light","contrast"];
+  const labels = {dark:"다크", light:"라이트", contrast:"고대비"};
+
+  function applyTheme(theme){
+    root.classList.remove("theme-light","theme-contrast");
+    if(theme==="light") root.classList.add("theme-light");
+    if(theme==="contrast") root.classList.add("theme-contrast");
+    if(btn) btn.textContent = `🌗 테마: ${labels[theme]||"다크"}`;
+  }
+
+  function getStored(){
+    return {
+      theme: localStorage.getItem("sparta_theme") || "dark",
+      auto:  (localStorage.getItem("sparta_theme_auto") || "0") === "1",
+      lock:  (localStorage.getItem("sparta_theme_lock") || "0") === "1"
+    };
+  }
+  function store({theme, autoOn, lockOn}){
+    if(theme) localStorage.setItem("sparta_theme", theme);
+    localStorage.setItem("sparta_theme_auto", autoOn ? "1":"0");
+    localStorage.setItem("sparta_theme_lock", lockOn ? "1":"0");
+  }
+
+  function pickAutoThemeByTime(){
+    const d = new Date();
+    const h = d.getHours();
+    // 기본: 07~18 라이트, 그 외 다크 (원하면 쉽게 변경 가능)
+    return (h >= 7 && h < 18) ? "light" : "dark";
+  }
+
+  function refresh(){
+    const s = getStored();
+    if(auto) auto.checked = s.auto;
+    if(lock) lock.checked = s.lock;
+
+    const theme = s.auto ? pickAutoThemeByTime() : s.theme;
+    applyTheme(theme);
+  }
+
+  // 테마 변경(순환)
+  function cycleTheme(){
+    const s = getStored();
+    const current = s.theme;
+    const idx = Math.max(0, THEMES.indexOf(current));
+    const next = THEMES[(idx + 1) % THEMES.length];
+    store({theme: next, autoOn: false, lockOn: s.lock});
+    if(auto) auto.checked = false;
+    applyTheme(next);
+  }
+
+  // 잠금 정책:
+  // - themeLock 체크 ON이면: 관리자 잠금(기본 기능) 해제 상태에서만 변경 허용
+  // - themeLock OFF면: 누구나 변경 가능(전광판 설치 환경에 따라 선택)
+  function isAdminUnlocked(){
+    // v4.6 패치 변수는 클로저라 접근 불가. 대신 UI 토스트 방식에서 "관리자 잠금(OFF)" 텍스트로 판별
+    const adminBtn = document.getElementById("adminLockBtn");
+    return adminBtn && adminBtn.textContent.includes("(OFF)");
+  }
+
+  if(btn){
+    btn.addEventListener("click", ()=>{
+      const s = getStored();
+      if(s.lock && !isAdminUnlocked()){
+        // 잠금 켜진 상태에서는 관리자 잠금 해제 필요
+        try{
+          const t = document.getElementById("toast");
+          if(t){ t.textContent="테마 잠금 상태입니다. 관리자 잠금 해제 후 변경하세요."; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1300); }
+          else alert("테마 잠금 상태입니다. 관리자 잠금 해제 후 변경하세요.");
+        }catch(e){}
+        return;
+      }
+      cycleTheme();
+    });
+  }
+
+  if(auto){
+    auto.addEventListener("change", ()=>{
+      const s = getStored();
+      store({theme: s.theme, autoOn: auto.checked, lockOn: s.lock});
+      refresh();
+    });
+  }
+
+  if(lock){
+    lock.addEventListener("change", ()=>{
+      const s = getStored();
+      store({theme: s.theme, autoOn: s.auto, lockOn: lock.checked});
+    });
+  }
+
+  // 자동 모드면 매 분마다 테마 재평가(시간대 넘어갈 때 자동 전환)
+  setInterval(()=>{
+    const s = getStored();
+    if(s.auto) refresh();
+  }, 60*1000);
+
+  refresh();
+})();
+</script>
+<div class="desc">전광판/TV에서는 전체화면을 권장합니다.<br/>아무 곳이나 한 번 터치해도 전체화면으로 전환됩니다.</div>
+    <div class="actions">
+      <button id="fsGoBtn">전체화면</button>
+      <button id="fsLaterBtn" class="secondary">나중에</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ===== v4.7.5 현재시간 강조 KST 보정 패치 ===== */
+(function(){
+  function getNowMinutesKST(){
+    const now = getKSTDate();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const kst = new Date(utc + (9 * 60 * 60000));
+    return kst.getHours() * 60 + kst.getMinutes();
+  }
+  function toMinutes(t){
+    if(!t) return -1;
+    const p = t.split(":").map(Number);
+    return p[0]*60 + p[1];
+  }
+
+  function highlightCurrentSlotKST(){
+    const nowMin = getNowMinutesKST();
+    document.querySelectorAll("[data-start][data-end]").forEach(row=>{
+      const s = toMinutes(row.dataset.start);
+      const e = toMinutes(row.dataset.end);
+      if(s <= nowMin && nowMin < e){
+        row.classList.add("active");
+      }else{
+        row.classList.remove("active");
+      }
+    });
+  }
+
+  window.addEventListener("load", ()=>{
+    highlightCurrentSlotKST();
+    setInterval(highlightCurrentSlotKST, 30000);
+  });
+})();
+</script>
+
+
+<script>
+/* ===== v4.7.6: 현재시각(KST) 표시 + 3단계(5분/1분/종료) 안내 ===== */
+(function(){
+  function getKSTDate(){
+    const now = getKSTDate();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    return new Date(utc + (9 * 60 * 60000));
+  }
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function formatHMS(d){ return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; }
+  function toMinutes(t){
+    if(!t) return -1;
+    const p = t.split(":").map(Number);
+    return p[0]*60 + p[1];
+  }
+  function nowSecondsKST(){
+    const d = getKSTDate();
+    return d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds();
+  }
+  function tickClock(){
+    const el = document.getElementById("nowClock");
+    if(el) el.textContent = formatHMS(getKSTDate());
+  }
+
+  function speakKo(text){
+    try{
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "ko-KR";
+      u.volume = 1.0;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function ringBell(type){
+    try{
+      const testBtn = document.getElementById("btnTest");
+      if(testBtn){ testBtn.click(); return; }
+    }catch(e){}
+    try{
+      if(typeof playBell === "function") return playBell(type);
+      if(typeof playBellSound === "function") return playBellSound(type);
+    }catch(e){}
+  }
+
+  const getTypeEnabled = (type)=>{
+    if(type==="break"){ const el=document.getElementById("warnBreakEnd"); return el ? el.checked : true; }
+    if(type==="meal"){  const el=document.getElementById("warnMealEnd");  return el ? el.checked : true; }
+    if(type==="class"){ const el=document.getElementById("warnClassEnd"); return el ? el.checked : true; }
+    return true;
+  };
+  const getStageEnabled = (stage)=>{
+    if(stage===5){ const el=document.getElementById("stage5"); return el ? el.checked : true; }
+    if(stage===1){ const el=document.getElementById("stage1"); return el ? el.checked : true; }
+    if(stage===0){ const el=document.getElementById("stage0"); return el ? el.checked : true; }
+    return true;
+  };
+
+  function msgFor(type, stage){
+    const next = "다음 교시";
+    if(type==="break"){
+      if(stage===5) return `휴식 종료 5분 전입니다. ${next} 준비해 주세요.`;
+      if(stage===1) return `휴식 종료 1분 전입니다. ${next}가 곧 시작됩니다.`;
+      return `휴식이 종료되었습니다. ${next}를 시작합니다.`;
+    }
+    if(type==="meal"){
+      if(stage===5) return `식사 시간 종료 5분 전입니다. ${next} 준비해 주세요.`;
+      if(stage===1) return `식사 시간 종료 1분 전입니다. ${next}가 곧 시작됩니다.`;
+      return `식사 시간이 종료되었습니다. ${next}를 시작합니다.`;
+    }
+    if(stage===5) return `수업 종료 5분 전입니다. 마무리해 주세요.`;
+    if(stage===1) return `수업 종료 1분 전입니다. 잠시 후 ${next}로 전환됩니다.`;
+    return `수업이 종료되었습니다. ${next}로 전환합니다.`;
+  }
+
+  function todayKey(){
+    const d=getKSTDate();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  const fired = new Set();
+
+  function check3Stage(){
+    try{
+      if(typeof schedule === "undefined" || !Array.isArray(schedule)) return;
+      const nSec = nowSecondsKST();
+
+      for(const seg of schedule){
+        if(!seg || !seg.key || !seg.start || !seg.end) continue;
+        const type = (seg.type||"").toLowerCase();
+        if(!getTypeEnabled(type)) continue;
+
+        const endMin = toMinutes(seg.end);
+        if(endMin < 0) continue;
+        const endSec = endMin * 60;
+
+        for(const st of [5,1,0]){
+          if(!getStageEnabled(st)) continue;
+          const trigSec = endSec - (st*60);
+          if(nSec === trigSec){
+            const k = `${todayKey()}|${seg.key}|${st}`;
+            if(fired.has(k)) continue;
+            fired.add(k);
+            ringBell(type);
+            speakKo(msgFor(type, st));
+          }
+        }
+      }
+    }catch(e){}
+  }
+
+  window.addEventListener("load", ()=>{
+    tickClock();
+    setInterval(tickClock, 1000);
+    setInterval(check3Stage, 1000);
+  });
+})();
+</script>
+
+
+<div id="adminPwModal" aria-hidden="true">
+  <div class="adminPwBackdrop"></div>
+  <div class="adminPwCard" role="dialog" aria-modal="true" aria-labelledby="adminPwTitle">
+    <div class="adminPwTitle" id="adminPwTitle">관리자 잠금 해제</div>
+    <div class="adminPwDesc">비밀번호를 입력해 주세요.</div>
+    <input id="adminPwInput" type="password" inputmode="text" autocomplete="off" placeholder="비밀번호" />
+    <div class="adminPwActions">
+      <button id="adminPwCancel" class="btnSecondary">취소</button>
+      <button id="adminPwOk" class="btnPrimary">확인</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ===== v4.7.7: 관리자 비밀번호 모달 로직 ===== */
+(function(){
+  const modal = document.getElementById("adminPwModal");
+  if(!modal) return;
+
+  const input = document.getElementById("adminPwInput");
+  const okBtn = document.getElementById("adminPwOk");
+  const cancelBtn = document.getElementById("adminPwCancel");
+  const backdrop = modal.querySelector(".adminPwBackdrop");
+
+  let resolver = null;
+
+  window.openAdminPwModal = function(){
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden","false");
+    if(input){ input.value=""; setTimeout(()=>input.focus(), 30); }
+    return new Promise((resolve)=>{ resolver = resolve; });
+  };
+
+  function close(val){
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden","true");
+    if(resolver){ const r=resolver; resolver=null; r(val); }
+  }
+
+  okBtn && okBtn.addEventListener("click", ()=> close(input ? input.value : ""));
+  cancelBtn && cancelBtn.addEventListener("click", ()=> close(null));
+  backdrop && backdrop.addEventListener("click", ()=> close(null));
+
+  window.addEventListener("keydown", (e)=>{
+    if(!modal.classList.contains("show")) return;
+    if(e.key === "Escape"){ e.preventDefault(); close(null); }
+    if(e.key === "Enter"){ e.preventDefault(); close(input ? input.value : ""); }
+  });
+})();
+</script>
+
+
+<script>
+/* ===== v3: 전체화면은 버튼으로만 (자동 전환/질문 제거) ===== */
+(function(){
+  function requestFullscreenSafe(){
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if(req) req.call(el).catch(()=>{});
+  }
+  function exitFullscreenSafe(){
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if(exit) exit.call(document).catch(()=>{});
+  }
+  function isFs(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  }
+
+  window.addEventListener("load", ()=>{
+    const btn = document.getElementById("btnFull");
+    if(!btn) return;
+    // 버튼 텍스트도 상태에 맞춰 갱신
+    const sync = ()=>{
+      btn.textContent = isFs() ? "전체화면 종료" : "전체화면";
+    };
+    document.addEventListener("fullscreenchange", sync);
+    document.addEventListener("webkitfullscreenchange", sync);
+    sync();
+
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      if(isFs()) exitFullscreenSafe();
+      else requestFullscreenSafe();
+    }, {passive:false});
+  });
+})();
+</script>
+
+
+<script>
+/* ===== v4: 오늘 시간표 '현재 구간' 자동 센터링(전체화면/TV 대응) ===== */
+(function(){
+  function centerActiveInToday(){
+    const list = document.querySelector(".todayList");
+    if(!list) return;
+
+    // 다양한 마크업 대비: row/timeRow 클래스 우선
+    const activeRow = list.querySelector(".row.active") || list.querySelector(".timeRow.active") || list.querySelector(".active");
+    if(!activeRow) return;
+
+    const row = activeRow.closest(".row, .timeRow") || activeRow;
+
+    const target = row.offsetTop - (list.clientHeight/2) + (row.clientHeight/2);
+    const maxScroll = Math.max(0, list.scrollHeight - list.clientHeight);
+    const next = Math.max(0, Math.min(target, maxScroll));
+    list.scrollTop = next;
+  }
+
+  function centerActiveSoon(){
+    requestAnimationFrame(()=>{ centerActiveInToday(); });
+    setTimeout(centerActiveInToday, 120);
+    setTimeout(centerActiveInToday, 400);
+    setTimeout(centerActiveInToday, 900);
+  }
+
+  window.addEventListener("load", centerActiveSoon);
+  window.addEventListener("resize", centerActiveSoon);
+  document.addEventListener("fullscreenchange", centerActiveSoon);
+  document.addEventListener("webkitfullscreenchange", centerActiveSoon);
+
+  // tick 후마다 센터링
+  const origTick = window.tick;
+  if(typeof origTick === "function"){
+    window.tick = function(){
+      const r = origTick.apply(this, arguments);
+      centerActiveSoon();
+      return r;
+    };
+  }
+})();
+</script>
+
 </body>
 </html>
